@@ -1,0 +1,289 @@
+#include "cpu_info.h"
+#include <sstream>
+#include <intrin.h>
+
+using namespace std;
+
+
+CpuInfo g_cpu;
+
+void make_cpu_info(CpuInfo& info);
+CPU_CLASS determine_x86_cpu_class(void);
+
+
+constexpr bool is_bit(int v, int i)
+{
+	return v & (1 << i);
+}
+
+void init_cpu_info(void)
+{
+	make_cpu_info(g_cpu);
+}
+
+const CpuInfo& get_cpu_info(void)
+{
+	return g_cpu;
+}
+
+string get_cpu_instruction_list(void)
+{
+	stringstream ss;
+	const CpuInfo& i = g_cpu;
+
+	if (i.m_sse2) ss << "sse2 ";
+	if (i.m_sse3) ss << "sse3 ";
+	if (i.m_ssse3) ss << "ssse3 ";
+	if (i.m_sse41) ss << "sse4.1 ";
+	if (i.m_sse42) ss << "sse4.2 ";
+	if (i.m_avx) ss << "avx ";
+	if (i.m_avx2) ss << "avx2 ";
+	if (i.m_fma3) ss << "fma3 ";
+	if (i.m_avx_vnni) ss << "avx.vnni ";
+
+	if (i.m_aes) ss << "aes ";
+
+	if (i.m_avx512_f) ss << "avx512.f ";
+	if (i.m_avx512_dq) ss << "avx512.dq ";
+	if (i.m_avx512_ifma) ss << "avx512.ifma ";
+	if (i.m_avx512_pf) ss << "avx512.pf ";
+	if (i.m_avx512_er) ss << "avx512.er ";
+	if (i.m_avx512_cd) ss << "avx512.cd ";
+	if (i.m_avx512_bw) ss << "avx512.bw ";
+	if (i.m_avx512_vl) ss << "avx512.vl ";
+	if (i.m_avx512_vbmi) ss << "avx512.vbmi ";
+	if (i.m_avx512_vbmi2) ss << "avx512.vbmi2 ";
+	if (i.m_avx512_vnni) ss << "avx512.vnni ";
+	if (i.m_avx512_bitalg) ss << "avx512.bitalg ";
+	if (i.m_avx512_vpopcntdq) ss << "avx512.vpopcntdq ";
+	if (i.m_avx512_4vnniw) ss << "avx512.4vnniq ";
+	if (i.m_avx512_4fmaps) ss << "avx512.4fmaps ";
+	if (i.m_avx512_vp2intersect) ss << "avx512.vp2intersect ";
+	if (i.m_avx512_bf16) ss << "avx512.bf16 ";
+
+	if (i.m_amx_tile) ss << "amx.tile ";
+	if (i.m_amx_int8) ss << "amx.int8 ";
+	if (i.m_amx_bf16) ss << "amx.bf16 ";
+
+	return ss.str();
+}
+
+void make_cpu_info(CpuInfo& info)
+{
+	memset(&info, 0, sizeof(CpuInfo));
+
+#ifdef _M_IA32		
+	info.m_arch = CPU_ARCH::x86;
+	info.m_class = determine_x86_cpu_class();
+	info.m_64 = false;
+#elif _M_X64
+	info.m_arch = CPU_ARCH::x86_64;
+	info.m_class = determine_x86_cpu_class();
+	info.m_64 = true;
+#elif _M_ARM64
+	info.m_arch = CPU_ARCH::arm64;
+	info.m_64 = false;
+#else
+	info.m_arch = CPU_ARCH::unknown;
+	info.m_64 = (sizeof(intptr_t) == 8);
+#endif
+
+	if (info.m_arch == CPU_ARCH::x86 || info.m_arch == CPU_ARCH::x86_64)
+	{
+		int regs[4];
+		__cpuid(regs, 0x0);
+		int maxF = regs[0];
+
+		__cpuid(regs, 0x1);
+		info.m_stepping = regs[0] & 0xf;
+		info.m_model = (regs[0] >> 4) & 0xf;
+		info.m_family = (regs[0] >> 8) & 0xf;
+		info.m_ext_model = (regs[0] >> 16) & 0xf;
+		info.m_ext_family = (regs[0] >> 20) & 0xf;
+
+		__cpuid(regs, 0x80000000);
+		int maxEf = regs[0];
+
+		__cpuid(regs, 1);
+		info.m_sse2 = is_bit(regs[3], 26);
+		info.m_sse3 = is_bit(regs[2], 0);
+		info.m_ssse3 = is_bit(regs[2], 9);
+		info.m_fma3 = is_bit(regs[2], 12);
+		info.m_sse41 = is_bit(regs[2], 19);
+		info.m_sse42 = is_bit(regs[2], 20);
+		info.m_avx = is_bit(regs[2], 28);
+		info.m_aes = is_bit(regs[2], 25);
+
+		__cpuidex(regs, 7, 0);
+		info.m_avx2 = is_bit(regs[1], 5);
+		info.m_avx512_f = is_bit(regs[1], 16);
+		info.m_avx512_dq = is_bit(regs[1], 17);
+		info.m_avx512_ifma = is_bit(regs[1], 21);
+		info.m_avx512_pf = is_bit(regs[1], 26);
+		info.m_avx512_er = is_bit(regs[1], 27);
+		info.m_avx512_cd = is_bit(regs[1], 28);
+		info.m_avx512_bw = is_bit(regs[1], 30);
+		info.m_avx512_vl = is_bit(regs[1], 31);
+		info.m_avx512_vbmi = is_bit(regs[2], 1);
+		info.m_avx512_vbmi2 = is_bit(regs[2], 6);
+		info.m_avx512_vnni = is_bit(regs[2], 11);
+		info.m_avx512_bitalg = is_bit(regs[2], 12);
+		info.m_avx512_vpopcntdq = is_bit(regs[2], 14);
+		info.m_avx512_4vnniw = is_bit(regs[3], 2);
+		info.m_avx512_4fmaps = is_bit(regs[3], 3);
+		info.m_avx512_vp2intersect = is_bit(regs[3], 8);
+		info.m_amx_tile = is_bit(regs[3], 24);
+		info.m_amx_int8 = is_bit(regs[3], 25);
+		info.m_amx_bf16 = is_bit(regs[3], 22);
+
+		__cpuidex(regs, 7, 0);
+		info.m_hybrid = is_bit(regs[3], 15);
+
+		__cpuidex(regs, 7, 1);
+		info.m_avx_vnni = is_bit(regs[0], 4);
+		info.m_avx512_bf16 = is_bit(regs[0], 5);
+
+		if (maxEf >= 0x80000004)
+		{
+			__cpuid(regs, 0x80000002);
+			memcpy(info.m_brandString, regs, sizeof(regs));
+
+			__cpuid(regs, 0x80000003);
+			memcpy(info.m_brandString + 16, regs, sizeof(regs));
+
+			__cpuid(regs, 0x80000004);
+			memcpy(info.m_brandString + 32, regs, sizeof(regs));
+		}
+	}
+}
+
+CPU_CLASS determine_x86_cpu_class(void)
+{
+	CPU_CLASS ret = CPU_CLASS::unknown;
+
+	int regs[4];
+	__cpuid(regs, 0x0);
+	if (regs[1] == 0x756e6547 && regs[2] == 0x6c65746e && regs[3] == 0x49656e69) // "GenuineIntel"
+		ret = CPU_CLASS::intel;
+	else // TODO: check for "AuthenticAMD"
+		ret = CPU_CLASS::amd;
+
+	int family = 0, model = 0, stepping = 0, ext_model = 0, ext_family = 0;
+	__cpuid(regs, 0x1);
+	stepping = regs[0] & 0xf;
+	model = (regs[0] >> 4) & 0xf;
+	family = (regs[0] >> 8) & 0xf;
+	ext_model = (regs[0] >> 16) & 0xf;
+	ext_family = (regs[0] >> 20) & 0xf;
+
+	int full_family = ext_family << 4 | family;
+	int full_model = ext_model << 4 | model;
+
+	if (ret == CPU_CLASS::intel)
+	{
+		if (full_family == 0x06)
+		{
+			switch (full_model)
+			{
+			case 0x7d: // ice lake (client) y
+			case 0x7e: // ice lake (client) u
+			case 0x8c: // tiger lake u
+			case 0x8d: // tiger lake h
+			case 0xa7: // rocket lake
+				ret = CPU_CLASS::intel_icelake;
+				break;
+
+			case 0x97: // alder lake p
+			case 0x9a: // alder lake s
+			case 0xb7: // raptor lake s,hx (8+16)
+			case 0xbf: // raptor lake s,hx
+			case 0xba: // raptor lake h,p,u
+				ret = CPU_CLASS::intel_alderlake;
+				break;
+
+			case 0xaa: // 
+			case 0xac: // 
+				ret = CPU_CLASS::intel_meteorlake;
+				break;
+
+			case 0x6a: // ice lake (server) sp
+			case 0x6c: // ice lake (server) de
+				ret = CPU_CLASS::intel_icelake_server;
+				break;
+
+			case 0x8f: // sapphire rapids
+				ret = CPU_CLASS::intel_sapphirerapids;
+				break;
+			}
+		}
+	}
+	else if (ret == CPU_CLASS::amd)
+	{
+		if (full_family == 0x8f)
+		{
+			if (full_model < 0x30)
+				ret = CPU_CLASS::amd_zen; // or zen+
+			else
+				ret = CPU_CLASS::amd_zen2;
+		}
+		else if (full_family == 0x9f)
+		{
+			ret = CPU_CLASS::amd_zen; // Dhyana
+		}
+		else if (full_family == 0xaf)
+		{
+			switch (ext_model)
+			{
+			case 0x0:
+			case 0x2:
+			case 0x4:
+			case 0x5:
+				ret = CPU_CLASS::amd_zen3;
+				break;
+
+			case 0x1:
+			case 0x6:
+			case 0x7:
+				ret = CPU_CLASS::amd_zen4;
+				break;
+			}
+		}
+	}
+
+	return ret;
+}
+
+std::string arch_to_string(CPU_ARCH arch)
+{
+	switch (arch)
+	{
+	case CPU_ARCH::x86: return "x86";
+	case CPU_ARCH::x86_64: return "x86-64";
+	case CPU_ARCH::arm: return "arm";
+	case CPU_ARCH::arm64: return "arm64";
+	}
+
+	return "unknown";
+}
+
+std::string class_to_string(CPU_CLASS arch)
+{
+	switch (arch)
+	{
+	case CPU_CLASS::intel: return "intel";
+	case CPU_CLASS::intel_icelake: return "icl";
+	case CPU_CLASS::intel_alderlake: return "adl";
+	case CPU_CLASS::intel_meteorlake: return "mtl";
+	case CPU_CLASS::intel_server: return "intel-srv";
+	case CPU_CLASS::intel_icelake_server: return "icl-srv";
+	case CPU_CLASS::intel_sapphirerapids: return "spr";
+
+	case CPU_CLASS::amd: return "amd";
+	case CPU_CLASS::amd_zen: return "zen";
+	case CPU_CLASS::amd_zen2: return "zen2";
+	case CPU_CLASS::amd_zen3: return "zen3";
+	case CPU_CLASS::amd_zen4: return "zen4";
+	}
+
+	return "unknown";
+}
