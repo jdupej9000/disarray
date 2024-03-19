@@ -40,9 +40,17 @@ string get_cpu_instruction_list(void)
 	if (i.m_avx2) ss << "avx2 ";
 	if (i.m_fma3) ss << "fma3 ";
 	if (i.m_avx_vnni) ss << "avx.vnni ";
+	if (i.m_avx_vnni_int8) ss << "avx.vnni.int8 ";
+	if (i.m_avx_vnni_int16) ss << "avx.vnni.int16 ";
+	if (i.m_avx_ifma) ss << "avx.ifma ";
+	if (i.m_avx_ne_cvt) ss << "avx.ne.cvt ";
 
+	if (i.m_bmi1) ss << "bmi1 ";
+	if (i.m_bmi2) ss << "bmi2 ";
+	if (i.m_adx) ss << "adx ";
+	if (i.m_apx) ss << "apx ";
 	if (i.m_aes) ss << "aes ";
-
+	
 	if (i.m_avx512_f) ss << "avx512.f ";
 	if (i.m_avx512_dq) ss << "avx512.dq ";
 	if (i.m_avx512_ifma) ss << "avx512.ifma ";
@@ -64,6 +72,10 @@ string get_cpu_instruction_list(void)
 	if (i.m_amx_tile) ss << "amx.tile ";
 	if (i.m_amx_int8) ss << "amx.int8 ";
 	if (i.m_amx_bf16) ss << "amx.bf16 ";
+	if (i.m_amx_cplx) ss << "amx.cplx ";
+
+	if (i.m_avx10_version > 0 && i.m_avx10_max_width > 0)
+		ss << "avx10." << i.m_avx10_version << "/" << i.m_avx10_max_width << " ";
 
 	return ss.str();
 }
@@ -94,15 +106,15 @@ void make_cpu_info(CpuInfo& info)
 		__cpuid(regs, 0x0);
 		int maxF = regs[0];
 
+		__cpuid(regs, 0x80000000);
+		int maxEf = regs[0];
+
 		__cpuid(regs, 0x1);
 		info.m_stepping = regs[0] & 0xf;
 		info.m_model = (regs[0] >> 4) & 0xf;
 		info.m_family = (regs[0] >> 8) & 0xf;
 		info.m_ext_model = (regs[0] >> 16) & 0xf;
 		info.m_ext_family = (regs[0] >> 20) & 0xf;
-
-		__cpuid(regs, 0x80000000);
-		int maxEf = regs[0];
 
 		__cpuid(regs, 1);
 		info.m_sse2 = is_bit(regs[3], 26);
@@ -111,8 +123,8 @@ void make_cpu_info(CpuInfo& info)
 		info.m_fma3 = is_bit(regs[2], 12);
 		info.m_sse41 = is_bit(regs[2], 19);
 		info.m_sse42 = is_bit(regs[2], 20);
-		info.m_avx = is_bit(regs[2], 28);
 		info.m_aes = is_bit(regs[2], 25);
+		info.m_avx = is_bit(regs[2], 28);
 
 		__cpuidex(regs, 7, 0);
 		info.m_avx2 = is_bit(regs[1], 5);
@@ -135,6 +147,8 @@ void make_cpu_info(CpuInfo& info)
 		info.m_amx_tile = is_bit(regs[3], 24);
 		info.m_amx_int8 = is_bit(regs[3], 25);
 		info.m_amx_bf16 = is_bit(regs[3], 22);
+		info.m_bmi1 = is_bit(regs[1], 3);
+		info.m_bmi2 = is_bit(regs[1], 8);
 
 		__cpuidex(regs, 7, 0);
 		info.m_hybrid = is_bit(regs[3], 15);
@@ -142,6 +156,27 @@ void make_cpu_info(CpuInfo& info)
 		__cpuidex(regs, 7, 1);
 		info.m_avx_vnni = is_bit(regs[0], 4);
 		info.m_avx512_bf16 = is_bit(regs[0], 5);
+		info.m_avx_ifma = is_bit(regs[0], 23);
+		info.m_avx_vnni_int8 = is_bit(regs[3], 4);
+		info.m_avx_ne_cvt = is_bit(regs[3], 5);
+		info.m_amx_cplx = is_bit(regs[3], 8);
+		info.m_avx_vnni_int16 = is_bit(regs[3], 16);
+		info.m_apx = is_bit(regs[3], 21);
+
+		if (maxF >= 0x24)
+		{
+			__cpuidex(regs, 0x24, 0);
+			info.m_avx10_version = regs[1] & 0xff;
+
+			if (is_bit(regs[1], 18))
+				info.m_avx10_max_width = 512;
+			else if (is_bit(regs[1], 17))
+				info.m_avx10_max_width = 256;
+			else if (is_bit(regs[1], 16))
+				info.m_avx10_max_width = 128;
+			else
+				info.m_avx10_max_width = 0;
+		}
 
 		if (maxEf >= 0x80000004)
 		{
@@ -195,15 +230,27 @@ CPU_CLASS determine_x86_cpu_class(void)
 
 			case 0x97: // alder lake p
 			case 0x9a: // alder lake s
+				ret = CPU_CLASS::intel_alderlake;
+				break;
+
 			case 0xb7: // raptor lake s,hx (8+16)
 			case 0xbf: // raptor lake s,hx
 			case 0xba: // raptor lake h,p,u
-				ret = CPU_CLASS::intel_alderlake;
+				ret = CPU_CLASS::intel_raptorlake;
 				break;
 
 			case 0xaa: // 
 			case 0xac: // 
 				ret = CPU_CLASS::intel_meteorlake;
+				break;
+
+			case 0xc5: // 
+			case 0xc6: // 
+				ret = CPU_CLASS::intel_arrowlake;
+				break;
+
+			case 0xbd: // 
+				ret = CPU_CLASS::intel_lunarlake;
 				break;
 
 			case 0x6a: // ice lake (server) sp
@@ -213,6 +260,23 @@ CPU_CLASS determine_x86_cpu_class(void)
 
 			case 0x8f: // sapphire rapids
 				ret = CPU_CLASS::intel_sapphirerapids;
+				break;
+
+			case 0xcf:
+				ret = CPU_CLASS::intel_graniterapids;
+				break;
+
+			case 0xad:
+			case 0xae:
+				ret = CPU_CLASS::intel_graniterapids;
+				break;
+
+			case 0xaf:
+				ret = CPU_CLASS::intel_crestmont_x;
+				break;
+
+			case 0xdd:
+				ret = CPU_CLASS::intel_darkmont_x;
 				break;
 			}
 		}
@@ -271,12 +335,20 @@ std::string class_to_string(CPU_CLASS arch)
 	switch (arch)
 	{
 	case CPU_CLASS::intel: return "intel";
-	case CPU_CLASS::intel_icelake: return "icl";
-	case CPU_CLASS::intel_alderlake: return "adl";
-	case CPU_CLASS::intel_meteorlake: return "mtl";
-	case CPU_CLASS::intel_server: return "intel-srv";
-	case CPU_CLASS::intel_icelake_server: return "icl-srv";
-	case CPU_CLASS::intel_sapphirerapids: return "spr";
+	case CPU_CLASS::intel_icelake: return "icelake";
+	case CPU_CLASS::intel_alderlake: return "alder lake";
+	case CPU_CLASS::intel_raptorlake: return "raptor lake";
+	case CPU_CLASS::intel_meteorlake: return "meteor lake";
+	case CPU_CLASS::intel_arrowlake: return "arrow lake";
+	case CPU_CLASS::intel_lunarlake: return "lunar lake";
+	case CPU_CLASS::intel_server: return "intel-x";
+	case CPU_CLASS::intel_icelake_server: return "icelake-x";
+	case CPU_CLASS::intel_sapphirerapids: return "sapphire rapids";
+	case CPU_CLASS::intel_graniterapids: return "granite rapids";
+	case CPU_CLASS::intel_emeraldrapids: return "emerald rapids";
+
+	case CPU_CLASS::intel_crestmont_x: return "sierra forest";
+	case CPU_CLASS::intel_darkmont_x: return "clearwater forest";
 
 	case CPU_CLASS::amd: return "amd";
 	case CPU_CLASS::amd_zen: return "zen";
