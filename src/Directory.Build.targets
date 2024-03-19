@@ -1,0 +1,7 @@
+<Project>
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+        </ClCompile>
+    </ItemDefinitionGroup>
+</Project>
