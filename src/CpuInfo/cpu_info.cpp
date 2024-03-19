@@ -268,7 +268,7 @@ CPU_CLASS determine_x86_cpu_class(void)
 
 			case 0xad:
 			case 0xae:
-				ret = CPU_CLASS::intel_graniterapids;
+				ret = CPU_CLASS::intel_emeraldrapids;
 				break;
 
 			case 0xaf:
