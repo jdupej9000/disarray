@@ -129,7 +129,9 @@ void make_cpu_info(CpuInfo& info)
 		info.m_model = (regs[0] >> 4) & 0xf;
 		info.m_family = (regs[0] >> 8) & 0xf;
 		info.m_ext_model = (regs[0] >> 16) & 0xf;
+		info.m_ext_model = (info.m_ext_model << 4) | info.m_model;
 		info.m_ext_family = (regs[0] >> 20) & 0xf;
+		info.m_ext_family = (info.m_ext_family << 4) | info.m_family;
 
 		info.m_sse = is_bit(regs[3], 25);
 		info.m_sse2 = is_bit(regs[3], 26);
