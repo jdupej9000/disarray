@@ -31,6 +31,7 @@ string get_cpu_instruction_list(void)
 	stringstream ss;
 	const CpuInfo& i = g_cpu;
 
+	if (i.m_sse) ss << "sse ";
 	if (i.m_sse2) ss << "sse2 ";
 	if (i.m_sse3) ss << "sse3 ";
 	if (i.m_ssse3) ss << "ssse3 ";
@@ -45,12 +46,25 @@ string get_cpu_instruction_list(void)
 	if (i.m_avx_ifma) ss << "avx.ifma ";
 	if (i.m_avx_ne_cvt) ss << "avx.ne.cvt ";
 
+	if (i.m_cmov) ss << "cmov ";
+	if (i.m_cx8) ss << "cx8 ";
+	if (i.m_cx16) ss << "cx16 ";
+	if (i.m_popcnt) ss << "popcnt ";
+	if (i.m_pclmulqdq) ss << "pclmulqdq ";
 	if (i.m_bmi1) ss << "bmi1 ";
 	if (i.m_bmi2) ss << "bmi2 ";
 	if (i.m_adx) ss << "adx ";
 	if (i.m_apx) ss << "apx ";
 	if (i.m_aes) ss << "aes ";
-	
+	if (i.m_vaes) ss << "vaes ";
+	if (i.m_fp16) ss << "fp16 ";
+	if (i.m_sha) ss << "sha ";
+	if (i.m_sha512) ss << "sha512 ";
+	if (i.m_sm3) ss << "sm3 ";
+	if (i.m_sm4) ss << "sm4 ";
+	if (i.m_cmpccxadd) ss << "cmpccxadd ";
+	if (i.m_movbe) ss << "movbe ";
+
 	if (i.m_avx512_f) ss << "avx512.f ";
 	if (i.m_avx512_dq) ss << "avx512.dq ";
 	if (i.m_avx512_ifma) ss << "avx512.ifma ";
@@ -73,6 +87,7 @@ string get_cpu_instruction_list(void)
 	if (i.m_amx_int8) ss << "amx.int8 ";
 	if (i.m_amx_bf16) ss << "amx.bf16 ";
 	if (i.m_amx_cplx) ss << "amx.cplx ";
+	if (i.m_amx_fp16) ss << "amx.fp16 ";
 
 	if (i.m_avx10_version > 0 && i.m_avx10_max_width > 0)
 		ss << "avx10." << i.m_avx10_version << "/" << i.m_avx10_max_width << " ";
@@ -94,7 +109,7 @@ void make_cpu_info(CpuInfo& info)
 	info.m_64 = true;
 #elif _M_ARM64
 	info.m_arch = CPU_ARCH::arm64;
-	info.m_64 = false;
+	info.m_64 = true;
 #else
 	info.m_arch = CPU_ARCH::unknown;
 	info.m_64 = (sizeof(intptr_t) == 8);
@@ -116,8 +131,10 @@ void make_cpu_info(CpuInfo& info)
 		info.m_ext_model = (regs[0] >> 16) & 0xf;
 		info.m_ext_family = (regs[0] >> 20) & 0xf;
 
-		__cpuid(regs, 1);
+		info.m_sse = is_bit(regs[3], 25);
 		info.m_sse2 = is_bit(regs[3], 26);
+		info.m_cx8 = is_bit(regs[3], 8);
+		info.m_cmov = is_bit(regs[3], 15);
 		info.m_sse3 = is_bit(regs[2], 0);
 		info.m_ssse3 = is_bit(regs[2], 9);
 		info.m_fma3 = is_bit(regs[2], 12);
@@ -125,6 +142,11 @@ void make_cpu_info(CpuInfo& info)
 		info.m_sse42 = is_bit(regs[2], 20);
 		info.m_aes = is_bit(regs[2], 25);
 		info.m_avx = is_bit(regs[2], 28);
+		info.m_fp16 = is_bit(regs[2], 29);
+		info.m_popcnt = is_bit(regs[2], 23);
+		info.m_pclmulqdq = is_bit(regs[2], 1);
+		info.m_cx16 = is_bit(regs[2], 13);
+		info.m_movbe = is_bit(regs[2], 22);
 
 		__cpuidex(regs, 7, 0);
 		info.m_avx2 = is_bit(regs[1], 5);
@@ -149,14 +171,21 @@ void make_cpu_info(CpuInfo& info)
 		info.m_amx_bf16 = is_bit(regs[3], 22);
 		info.m_bmi1 = is_bit(regs[1], 3);
 		info.m_bmi2 = is_bit(regs[1], 8);
+		info.m_sha = is_bit(regs[1], 29);
+		info.m_vaes = is_bit(regs[2], 9);
 
 		__cpuidex(regs, 7, 0);
 		info.m_hybrid = is_bit(regs[3], 15);
 
 		__cpuidex(regs, 7, 1);
+		info.m_sha512 = is_bit(regs[0], 0);
+		info.m_sm3 = is_bit(regs[0], 1);
+		info.m_sm4 = is_bit(regs[0], 2);
 		info.m_avx_vnni = is_bit(regs[0], 4);
 		info.m_avx512_bf16 = is_bit(regs[0], 5);
+		info.m_cmpccxadd = is_bit(regs[0], 7);
 		info.m_avx_ifma = is_bit(regs[0], 23);
+		info.m_amx_fp16 = is_bit(regs[0], 21);
 		info.m_avx_vnni_int8 = is_bit(regs[3], 4);
 		info.m_avx_ne_cvt = is_bit(regs[3], 5);
 		info.m_amx_cplx = is_bit(regs[3], 8);
@@ -189,6 +218,17 @@ void make_cpu_info(CpuInfo& info)
 			__cpuid(regs, 0x80000004);
 			memcpy(info.m_brandString + 32, regs, sizeof(regs));
 		}
+
+		if (info.m_avx512_f && info.m_avx512_bw && info.m_avx512_cd && info.m_avx512_dq && info.m_avx512_vl)
+			info.m_level = 4;
+		else if (info.m_avx && info.m_avx2 && info.m_bmi1 && info.m_bmi2 && info.m_fp16 && info.m_movbe) // & lzcnt, osxsave
+			info.m_level = 3;
+		else if (info.m_cx16 && info.m_popcnt && info.m_sse3 && info.m_sse41 && info.m_sse42 && info.m_ssse3) // & lahf-sahf
+			info.m_level = 2;
+		else if (info.m_cmov && info.m_cx8 && info.m_sse && info.m_sse2)
+			info.m_level = 1;
+		else
+			info.m_level = 0; // should not happen
 	}
 }
 
@@ -272,11 +312,11 @@ CPU_CLASS determine_x86_cpu_class(void)
 				break;
 
 			case 0xaf:
-				ret = CPU_CLASS::intel_crestmont_x;
+				ret = CPU_CLASS::intel_sierraforest;
 				break;
 
 			case 0xdd:
-				ret = CPU_CLASS::intel_darkmont_x;
+				ret = CPU_CLASS::intel_clearwaterforest;
 				break;
 			}
 		}
@@ -317,12 +357,12 @@ CPU_CLASS determine_x86_cpu_class(void)
 	return ret;
 }
 
-std::string arch_to_string(CPU_ARCH arch)
+std::string arch_to_string(CPU_ARCH arch, short level)
 {
 	switch (arch)
 	{
 	case CPU_ARCH::x86: return "x86";
-	case CPU_ARCH::x86_64: return "x86-64";
+	case CPU_ARCH::x86_64: return "x86-64-v" + std::to_string(level);
 	case CPU_ARCH::arm: return "arm";
 	case CPU_ARCH::arm64: return "arm64";
 	}
@@ -347,8 +387,8 @@ std::string class_to_string(CPU_CLASS arch)
 	case CPU_CLASS::intel_graniterapids: return "granite rapids";
 	case CPU_CLASS::intel_emeraldrapids: return "emerald rapids";
 
-	case CPU_CLASS::intel_crestmont_x: return "sierra forest";
-	case CPU_CLASS::intel_darkmont_x: return "clearwater forest";
+	case CPU_CLASS::intel_sierraforest: return "sierra forest";
+	case CPU_CLASS::intel_clearwaterforest: return "clearwater forest";
 
 	case CPU_CLASS::amd: return "amd";
 	case CPU_CLASS::amd_zen: return "zen";
