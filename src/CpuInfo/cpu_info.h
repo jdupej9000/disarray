@@ -16,20 +16,14 @@ enum class CPU_CLASS : int
 	unknown,
 
 	intel = 0x1000,
-	intel_icelake = intel | 0x1,
-	intel_alderlake = intel | 0x2,
-	intel_raptorlake = intel | 0x3,
-	intel_meteorlake = intel | 0x4,
-	intel_arrowlake = intel | 0x5,
-	intel_lunarlake = intel | 0x6,
+	intel_skl = intel | 0x1,
+	intel_icl = intel | 0x2,
+	intel_adl = intel | 0x3,
 
-	intel_server = 0x2000,
-	intel_icelake_server = intel_server | 0x1,
-	intel_sapphirerapids = intel_server | 0x2,
-	intel_graniterapids = intel_server | 0x3,
-	intel_emeraldrapids = intel_server | 0x4,
-	intel_sierraforest = intel_server | 0x5,
-	intel_clearwaterforest = intel_server | 0x6,
+	intel_x = 0x2000,
+	intel_skl_x = intel_x | 0x1,
+	intel_icl_x = intel_x | 0x2,
+	intel_spr_x = intel_x | 0x3,
 
 	amd = 0x4000,
 	amd_zen = amd | 0x1,
@@ -56,6 +50,7 @@ struct CpuInfo
 	bool m_amx_tile, m_amx_int8, m_amx_bf16, m_amx_cplx, m_amx_fp16;
 	unsigned short m_avx10_version, m_avx10_max_width;
 	char m_brandString[48];
+	char m_codeName[32];
 };
 
 void init_cpu_info(void);

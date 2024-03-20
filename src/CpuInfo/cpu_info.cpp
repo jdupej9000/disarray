@@ -8,7 +8,7 @@ using namespace std;
 CpuInfo g_cpu;
 
 void make_cpu_info(CpuInfo& info);
-CPU_CLASS determine_x86_cpu_class(void);
+void determine_x86_cpu_class(CpuInfo& inf);
 
 
 constexpr bool is_bit(int v, int i)
@@ -101,11 +101,11 @@ void make_cpu_info(CpuInfo& info)
 
 #ifdef _M_IA32		
 	info.m_arch = CPU_ARCH::x86;
-	info.m_class = determine_x86_cpu_class();
+	determine_x86_cpu_class(info);
 	info.m_64 = false;
 #elif _M_X64
 	info.m_arch = CPU_ARCH::x86_64;
-	info.m_class = determine_x86_cpu_class();
+	determine_x86_cpu_class(info);
 	info.m_64 = true;
 #elif _M_ARM64
 	info.m_arch = CPU_ARCH::arm64;
@@ -231,7 +231,7 @@ void make_cpu_info(CpuInfo& info)
 	}
 }
 
-CPU_CLASS determine_x86_cpu_class(void)
+void determine_x86_cpu_class(CpuInfo& inf)
 {
 	CPU_CLASS ret = CPU_CLASS::unknown;
 
@@ -249,19 +249,22 @@ CPU_CLASS determine_x86_cpu_class(void)
 	family = (regs[0] >> 8) & 0xf;
 	ext_model = (regs[0] >> 16) & 0xf;
 	ext_family = (regs[0] >> 20) & 0xf;
-
+	
 	int full_family = ext_family << 4 | family;
 	int full_model = ext_model << 4 | model;
+	const char* pszCodeName = "";
 
 #define CPUIDHASH(v,ef,em) (((int)(v) << 4) | (ef << 8) | (em))
-#define X86CPU(v,ef,em,cl,nm) case CPUIDHASH(CPU_CLASS::v,0x##ef,0x##em): { ret = CPU_CLASS:: cl; } break; 
+#define X86CPU(v,ef,em,cl,nm) case CPUIDHASH(CPU_CLASS::v,0x##ef,0x##em): { ret = CPU_CLASS:: cl; pszCodeName = nm; } break; 
 
 	switch (CPUIDHASH(ret, full_family, full_model))
 	{
 		#include "x86-cpu-table.inc"
 	}
 
-	return ret;
+	strcpy_s(inf.m_codeName, 32, pszCodeName);
+
+	inf.m_class = ret;
 }
 
 std::string arch_to_string(CPU_ARCH arch, short level)
@@ -282,20 +285,13 @@ std::string class_to_string(CPU_CLASS arch)
 	switch (arch)
 	{
 	case CPU_CLASS::intel: return "intel";
-	case CPU_CLASS::intel_icelake: return "icelake";
-	case CPU_CLASS::intel_alderlake: return "alder lake";
-	case CPU_CLASS::intel_raptorlake: return "raptor lake";
-	case CPU_CLASS::intel_meteorlake: return "meteor lake";
-	case CPU_CLASS::intel_arrowlake: return "arrow lake";
-	case CPU_CLASS::intel_lunarlake: return "lunar lake";
-	case CPU_CLASS::intel_server: return "intel-x";
-	case CPU_CLASS::intel_icelake_server: return "icelake-x";
-	case CPU_CLASS::intel_sapphirerapids: return "sapphire rapids";
-	case CPU_CLASS::intel_graniterapids: return "granite rapids";
-	case CPU_CLASS::intel_emeraldrapids: return "emerald rapids";
-
-	case CPU_CLASS::intel_sierraforest: return "sierra forest";
-	case CPU_CLASS::intel_clearwaterforest: return "clearwater forest";
+	case CPU_CLASS::intel_skl: return "SKL";
+	case CPU_CLASS::intel_icl: return "ICL";
+	case CPU_CLASS::intel_adl: return "ADL";
+	case CPU_CLASS::intel_x: return "intel-x";
+	case CPU_CLASS::intel_skl_x: return "SKL-X";
+	case CPU_CLASS::intel_icl_x: return "ICL-X";
+	case CPU_CLASS::intel_spr_x: return "SPR-X";
 
 	case CPU_CLASS::amd: return "amd";
 	case CPU_CLASS::amd_zen: return "zen";
