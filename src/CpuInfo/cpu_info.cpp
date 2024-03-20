@@ -132,7 +132,6 @@ void make_cpu_info(CpuInfo& info)
 		info.m_ext_model = (info.m_ext_model << 4) | info.m_model;
 		info.m_ext_family = (regs[0] >> 20) & 0xf;
 		info.m_ext_family = (info.m_ext_family << 4) | info.m_family;
-
 		info.m_sse = is_bit(regs[3], 25);
 		info.m_sse2 = is_bit(regs[3], 26);
 		info.m_cx8 = is_bit(regs[3], 8);
@@ -175,8 +174,6 @@ void make_cpu_info(CpuInfo& info)
 		info.m_bmi2 = is_bit(regs[1], 8);
 		info.m_sha = is_bit(regs[1], 29);
 		info.m_vaes = is_bit(regs[2], 9);
-
-		__cpuidex(regs, 7, 0);
 		info.m_hybrid = is_bit(regs[3], 15);
 
 		__cpuidex(regs, 7, 1);
@@ -256,104 +253,12 @@ CPU_CLASS determine_x86_cpu_class(void)
 	int full_family = ext_family << 4 | family;
 	int full_model = ext_model << 4 | model;
 
-	if (ret == CPU_CLASS::intel)
+#define CPUIDHASH(v,ef,em) (((int)(v) << 4) | (ef << 8) | (em))
+#define X86CPU(v,ef,em,cl,nm) case CPUIDHASH(CPU_CLASS::v,0x##ef,0x##em): { ret = CPU_CLASS:: cl; } break; 
+
+	switch (CPUIDHASH(ret, full_family, full_model))
 	{
-		if (full_family == 0x06)
-		{
-			switch (full_model)
-			{
-			case 0x7d: // ice lake (client) y
-			case 0x7e: // ice lake (client) u
-			case 0x8c: // tiger lake u
-			case 0x8d: // tiger lake h
-			case 0xa7: // rocket lake
-				ret = CPU_CLASS::intel_icelake;
-				break;
-
-			case 0x97: // alder lake p
-			case 0x9a: // alder lake s
-				ret = CPU_CLASS::intel_alderlake;
-				break;
-
-			case 0xb7: // raptor lake s,hx (8+16)
-			case 0xbf: // raptor lake s,hx
-			case 0xba: // raptor lake h,p,u
-				ret = CPU_CLASS::intel_raptorlake;
-				break;
-
-			case 0xaa: // 
-			case 0xac: // 
-				ret = CPU_CLASS::intel_meteorlake;
-				break;
-
-			case 0xc5: // 
-			case 0xc6: // 
-				ret = CPU_CLASS::intel_arrowlake;
-				break;
-
-			case 0xbd: // 
-				ret = CPU_CLASS::intel_lunarlake;
-				break;
-
-			case 0x6a: // ice lake (server) sp
-			case 0x6c: // ice lake (server) de
-				ret = CPU_CLASS::intel_icelake_server;
-				break;
-
-			case 0x8f: // sapphire rapids
-				ret = CPU_CLASS::intel_sapphirerapids;
-				break;
-
-			case 0xcf:
-				ret = CPU_CLASS::intel_graniterapids;
-				break;
-
-			case 0xad:
-			case 0xae:
-				ret = CPU_CLASS::intel_emeraldrapids;
-				break;
-
-			case 0xaf:
-				ret = CPU_CLASS::intel_sierraforest;
-				break;
-
-			case 0xdd:
-				ret = CPU_CLASS::intel_clearwaterforest;
-				break;
-			}
-		}
-	}
-	else if (ret == CPU_CLASS::amd)
-	{
-		if (full_family == 0x8f)
-		{
-			if (full_model < 0x30)
-				ret = CPU_CLASS::amd_zen; // or zen+
-			else
-				ret = CPU_CLASS::amd_zen2;
-		}
-		else if (full_family == 0x9f)
-		{
-			ret = CPU_CLASS::amd_zen; // Dhyana
-		}
-		else if (full_family == 0xaf)
-		{
-			switch (ext_model)
-			{
-			case 0x0:
-			case 0x2:
-			case 0x4:
-			case 0x5:
-				ret = CPU_CLASS::amd_zen3;
-				break;
-
-			case 0x1:
-			case 0x6:
-			case 0x7:
-				ret = CPU_CLASS::amd_zen4;
-				break;
-			}
-		}
+		#include "x86-cpu-table.inc"
 	}
 
 	return ret;

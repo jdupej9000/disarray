@@ -133,6 +133,9 @@
   <ItemGroup>
     <ClInclude Include="cpu_info.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="x86-cpu-table.inc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
