@@ -27,7 +27,7 @@ int encode_leb128_bmi(uint8_t* pDest, uint32_t x)
 int encode_leb128_bmi(uint8_t* pDest, uint64_t x)
 {
     int length = DivideBy7Rev_64[_lzcnt_u64(x)];
-
+    
     // We may write more Bytes than needed, but the pointer will be
     // incremented by the correct amount. So we need the buffer to be
     // at least 7 Bytes extra at the end for safety.
