@@ -42,10 +42,6 @@ int encode_leb128_bmi(uint8_t* pDest, uint64_t x)
     return length + 1;
 }
 
-int encode_vl(uint8_t* pDest, uint32_t x)
-{
-}
-
 uint32_t encode_morton_bmi(uint16_t a, uint16_t b)
 {
     return _pdep_u32(a, Mask_InterleaveOdd_32) | _pdep_u32(b, Mask_InterleaveEven_32);
