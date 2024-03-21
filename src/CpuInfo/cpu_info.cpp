@@ -8,8 +8,9 @@ using namespace std;
 CpuInfo g_cpu;
 
 void make_cpu_info(CpuInfo& info);
-void determine_x86_cpu_class(CpuInfo& inf);
-
+void make_x86_base_info(CpuInfo& info);
+void make_x86_cpu_class(CpuInfo& inf);
+void make_x86_cpu_caps(CpuInfo& info);
 
 constexpr bool is_bit(int v, int i)
 {
@@ -101,12 +102,16 @@ void make_cpu_info(CpuInfo& info)
 
 #ifdef _M_IA32		
 	info.m_arch = CPU_ARCH::x86;
-	determine_x86_cpu_class(info);
 	info.m_64 = false;
+	make_x86_base_info(info);
+	make_x86_cpu_caps(info);
+	make_x86_cpu_class(info);
 #elif _M_X64
 	info.m_arch = CPU_ARCH::x86_64;
-	determine_x86_cpu_class(info);
 	info.m_64 = true;
+	make_x86_base_info(info);
+	make_x86_cpu_caps(info);
+	make_x86_cpu_class(info);
 #elif _M_ARM64
 	info.m_arch = CPU_ARCH::arm64;
 	info.m_64 = true;
@@ -114,124 +119,134 @@ void make_cpu_info(CpuInfo& info)
 	info.m_arch = CPU_ARCH::unknown;
 	info.m_64 = (sizeof(intptr_t) == 8);
 #endif
+}
 
-	if (info.m_arch == CPU_ARCH::x86 || info.m_arch == CPU_ARCH::x86_64)
+void make_x86_base_info(CpuInfo& info)
+{
+	int regs[4];
+	__cpuid(regs, 0x0);
+	int maxF = regs[0];
+
+	__cpuid(regs, 0x80000000);
+	int maxEf = regs[0];
+
+	__cpuid(regs, 0x1);
+	info.m_stepping = regs[0] & 0xf;
+	info.m_model = (regs[0] >> 4) & 0xf;
+	info.m_family = (regs[0] >> 8) & 0xf;
+	info.m_ext_model = (regs[0] >> 16) & 0xf;
+	info.m_ext_model = (info.m_ext_model << 4) | info.m_model;
+	info.m_ext_family = (regs[0] >> 20) & 0xf;
+	info.m_ext_family = (info.m_ext_family << 4) | info.m_family;
+
+	if (maxEf >= 0x80000004)
 	{
-		int regs[4];
-		__cpuid(regs, 0x0);
-		int maxF = regs[0];
-
-		__cpuid(regs, 0x80000000);
-		int maxEf = regs[0];
-
-		__cpuid(regs, 0x1);
-		info.m_stepping = regs[0] & 0xf;
-		info.m_model = (regs[0] >> 4) & 0xf;
-		info.m_family = (regs[0] >> 8) & 0xf;
-		info.m_ext_model = (regs[0] >> 16) & 0xf;
-		info.m_ext_model = (info.m_ext_model << 4) | info.m_model;
-		info.m_ext_family = (regs[0] >> 20) & 0xf;
-		info.m_ext_family = (info.m_ext_family << 4) | info.m_family;
-		info.m_sse = is_bit(regs[3], 25);
-		info.m_sse2 = is_bit(regs[3], 26);
-		info.m_cx8 = is_bit(regs[3], 8);
-		info.m_cmov = is_bit(regs[3], 15);
-		info.m_sse3 = is_bit(regs[2], 0);
-		info.m_ssse3 = is_bit(regs[2], 9);
-		info.m_fma3 = is_bit(regs[2], 12);
-		info.m_sse41 = is_bit(regs[2], 19);
-		info.m_sse42 = is_bit(regs[2], 20);
-		info.m_aes = is_bit(regs[2], 25);
-		info.m_avx = is_bit(regs[2], 28);
-		info.m_fp16 = is_bit(regs[2], 29);
-		info.m_popcnt = is_bit(regs[2], 23);
-		info.m_pclmulqdq = is_bit(regs[2], 1);
-		info.m_cx16 = is_bit(regs[2], 13);
-		info.m_movbe = is_bit(regs[2], 22);
-
-		__cpuidex(regs, 7, 0);
-		info.m_avx2 = is_bit(regs[1], 5);
-		info.m_avx512_f = is_bit(regs[1], 16);
-		info.m_avx512_dq = is_bit(regs[1], 17);
-		info.m_avx512_ifma = is_bit(regs[1], 21);
-		info.m_avx512_pf = is_bit(regs[1], 26);
-		info.m_avx512_er = is_bit(regs[1], 27);
-		info.m_avx512_cd = is_bit(regs[1], 28);
-		info.m_avx512_bw = is_bit(regs[1], 30);
-		info.m_avx512_vl = is_bit(regs[1], 31);
-		info.m_avx512_vbmi = is_bit(regs[2], 1);
-		info.m_avx512_vbmi2 = is_bit(regs[2], 6);
-		info.m_avx512_vnni = is_bit(regs[2], 11);
-		info.m_avx512_bitalg = is_bit(regs[2], 12);
-		info.m_avx512_vpopcntdq = is_bit(regs[2], 14);
-		info.m_avx512_4vnniw = is_bit(regs[3], 2);
-		info.m_avx512_4fmaps = is_bit(regs[3], 3);
-		info.m_avx512_vp2intersect = is_bit(regs[3], 8);
-		info.m_amx_tile = is_bit(regs[3], 24);
-		info.m_amx_int8 = is_bit(regs[3], 25);
-		info.m_amx_bf16 = is_bit(regs[3], 22);
-		info.m_bmi1 = is_bit(regs[1], 3);
-		info.m_bmi2 = is_bit(regs[1], 8);
-		info.m_sha = is_bit(regs[1], 29);
-		info.m_vaes = is_bit(regs[2], 9);
-		info.m_hybrid = is_bit(regs[3], 15);
-
-		__cpuidex(regs, 7, 1);
-		info.m_sha512 = is_bit(regs[0], 0);
-		info.m_sm3 = is_bit(regs[0], 1);
-		info.m_sm4 = is_bit(regs[0], 2);
-		info.m_avx_vnni = is_bit(regs[0], 4);
-		info.m_avx512_bf16 = is_bit(regs[0], 5);
-		info.m_cmpccxadd = is_bit(regs[0], 7);
-		info.m_avx_ifma = is_bit(regs[0], 23);
-		info.m_amx_fp16 = is_bit(regs[0], 21);
-		info.m_avx_vnni_int8 = is_bit(regs[3], 4);
-		info.m_avx_ne_cvt = is_bit(regs[3], 5);
-		info.m_amx_cplx = is_bit(regs[3], 8);
-		info.m_avx_vnni_int16 = is_bit(regs[3], 16);
-		info.m_apx = is_bit(regs[3], 21);
-
-		if (maxF >= 0x24)
-		{
-			__cpuidex(regs, 0x24, 0);
-			info.m_avx10_version = regs[1] & 0xff;
-
-			if (is_bit(regs[1], 18))
-				info.m_avx10_max_width = 512;
-			else if (is_bit(regs[1], 17))
-				info.m_avx10_max_width = 256;
-			else if (is_bit(regs[1], 16))
-				info.m_avx10_max_width = 128;
-			else
-				info.m_avx10_max_width = 0;
-		}
-
-		if (maxEf >= 0x80000004)
-		{
-			__cpuid(regs, 0x80000002);
-			memcpy(info.m_brandString, regs, sizeof(regs));
-
-			__cpuid(regs, 0x80000003);
-			memcpy(info.m_brandString + 16, regs, sizeof(regs));
-
-			__cpuid(regs, 0x80000004);
-			memcpy(info.m_brandString + 32, regs, sizeof(regs));
-		}
-
-		if (info.m_avx512_f && info.m_avx512_bw && info.m_avx512_cd && info.m_avx512_dq && info.m_avx512_vl)
-			info.m_level = 4;
-		else if (info.m_avx && info.m_avx2 && info.m_bmi1 && info.m_bmi2 && info.m_fp16 && info.m_movbe) // & lzcnt, osxsave
-			info.m_level = 3;
-		else if (info.m_cx16 && info.m_popcnt && info.m_sse3 && info.m_sse41 && info.m_sse42 && info.m_ssse3) // & lahf-sahf
-			info.m_level = 2;
-		else if (info.m_cmov && info.m_cx8 && info.m_sse && info.m_sse2)
-			info.m_level = 1;
-		else
-			info.m_level = 0; // should not happen
+		__cpuid(regs, 0x80000002);
+		memcpy(info.m_brandString, regs, sizeof(regs));
+		__cpuid(regs, 0x80000003);
+		memcpy(info.m_brandString + 16, regs, sizeof(regs));
+		__cpuid(regs, 0x80000004);
+		memcpy(info.m_brandString + 32, regs, sizeof(regs));
 	}
 }
 
-void determine_x86_cpu_class(CpuInfo& inf)
+void make_x86_cpu_caps(CpuInfo& info)
+{
+	int regs[4];
+	__cpuid(regs, 0x0);
+	int maxF = regs[0];
+
+	__cpuid(regs, 0x80000000);
+	int maxEf = regs[0];
+
+	__cpuid(regs, 0x1);
+	info.m_sse = is_bit(regs[3], 25);
+	info.m_sse2 = is_bit(regs[3], 26);
+	info.m_cx8 = is_bit(regs[3], 8);
+	info.m_cmov = is_bit(regs[3], 15);
+	info.m_sse3 = is_bit(regs[2], 0);
+	info.m_ssse3 = is_bit(regs[2], 9);
+	info.m_fma3 = is_bit(regs[2], 12);
+	info.m_sse41 = is_bit(regs[2], 19);
+	info.m_sse42 = is_bit(regs[2], 20);
+	info.m_aes = is_bit(regs[2], 25);
+	info.m_avx = is_bit(regs[2], 28);
+	info.m_fp16 = is_bit(regs[2], 29);
+	info.m_popcnt = is_bit(regs[2], 23);
+	info.m_pclmulqdq = is_bit(regs[2], 1);
+	info.m_cx16 = is_bit(regs[2], 13);
+	info.m_movbe = is_bit(regs[2], 22);
+
+	__cpuidex(regs, 7, 0);
+	info.m_avx2 = is_bit(regs[1], 5);
+	info.m_avx512_f = is_bit(regs[1], 16);
+	info.m_avx512_dq = is_bit(regs[1], 17);
+	info.m_avx512_ifma = is_bit(regs[1], 21);
+	info.m_avx512_pf = is_bit(regs[1], 26);
+	info.m_avx512_er = is_bit(regs[1], 27);
+	info.m_avx512_cd = is_bit(regs[1], 28);
+	info.m_avx512_bw = is_bit(regs[1], 30);
+	info.m_avx512_vl = is_bit(regs[1], 31);
+	info.m_avx512_vbmi = is_bit(regs[2], 1);
+	info.m_avx512_vbmi2 = is_bit(regs[2], 6);
+	info.m_avx512_vnni = is_bit(regs[2], 11);
+	info.m_avx512_bitalg = is_bit(regs[2], 12);
+	info.m_avx512_vpopcntdq = is_bit(regs[2], 14);
+	info.m_avx512_4vnniw = is_bit(regs[3], 2);
+	info.m_avx512_4fmaps = is_bit(regs[3], 3);
+	info.m_avx512_vp2intersect = is_bit(regs[3], 8);
+	info.m_amx_tile = is_bit(regs[3], 24);
+	info.m_amx_int8 = is_bit(regs[3], 25);
+	info.m_amx_bf16 = is_bit(regs[3], 22);
+	info.m_bmi1 = is_bit(regs[1], 3);
+	info.m_bmi2 = is_bit(regs[1], 8);
+	info.m_sha = is_bit(regs[1], 29);
+	info.m_vaes = is_bit(regs[2], 9);
+	info.m_hybrid = is_bit(regs[3], 15);
+
+	__cpuidex(regs, 7, 1);
+	info.m_sha512 = is_bit(regs[0], 0);
+	info.m_sm3 = is_bit(regs[0], 1);
+	info.m_sm4 = is_bit(regs[0], 2);
+	info.m_avx_vnni = is_bit(regs[0], 4);
+	info.m_avx512_bf16 = is_bit(regs[0], 5);
+	info.m_cmpccxadd = is_bit(regs[0], 7);
+	info.m_avx_ifma = is_bit(regs[0], 23);
+	info.m_amx_fp16 = is_bit(regs[0], 21);
+	info.m_avx_vnni_int8 = is_bit(regs[3], 4);
+	info.m_avx_ne_cvt = is_bit(regs[3], 5);
+	info.m_amx_cplx = is_bit(regs[3], 8);
+	info.m_avx_vnni_int16 = is_bit(regs[3], 16);
+	info.m_apx = is_bit(regs[3], 21);
+
+	if (maxF >= 0x24)
+	{
+		__cpuidex(regs, 0x24, 0);
+		info.m_avx10_version = regs[1] & 0xff;
+
+		if (is_bit(regs[1], 18))
+			info.m_avx10_max_width = 512;
+		else if (is_bit(regs[1], 17))
+			info.m_avx10_max_width = 256;
+		else if (is_bit(regs[1], 16))
+			info.m_avx10_max_width = 128;
+		else
+			info.m_avx10_max_width = 0;
+	}
+
+	if (info.m_avx512_f && info.m_avx512_bw && info.m_avx512_cd && info.m_avx512_dq && info.m_avx512_vl)
+		info.m_level = 4;
+	else if (info.m_avx && info.m_avx2 && info.m_bmi1 && info.m_bmi2 && info.m_fp16 && info.m_movbe) // & lzcnt, osxsave
+		info.m_level = 3;
+	else if (info.m_cx16 && info.m_popcnt && info.m_sse3 && info.m_sse41 && info.m_sse42 && info.m_ssse3) // & lahf-sahf
+		info.m_level = 2;
+	else if (info.m_cmov && info.m_cx8 && info.m_sse && info.m_sse2)
+		info.m_level = 1;
+	else
+		info.m_level = 0; // should not happen
+}
+
+void make_x86_cpu_class(CpuInfo& inf)
 {
 	CPU_CLASS ret = CPU_CLASS::unknown;
 
@@ -262,7 +277,7 @@ void determine_x86_cpu_class(CpuInfo& inf)
 		#include "x86-cpu-table.inc"
 	}
 
-	strcpy_s(inf.m_codeName, 32, pszCodeName);
+	strcpy_s(inf.m_codeName, MAX_CODENAME_LEN, pszCodeName);
 
 	inf.m_class = ret;
 }
