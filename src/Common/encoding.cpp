@@ -9,9 +9,7 @@ static const uint64_t UpperBit_7b8b_64[10] = { 0x0, 0x80, 0x8080, 0x808080, 0x80
 constexpr uint32_t Mask_7b8b_32 = 0b01111111011111110111111101111111u;
 constexpr uint64_t Mask_7b8b_64 = 0b0111111101111111011111110111111101111111011111110111111101111111llu;
 constexpr uint32_t Mask_InterleaveOdd_32 = 0b01010101010101010101010101010101;
-constexpr uint32_t Mask_InterleaveEven_32 = 0b10101010101010101010101010101010;
 constexpr uint32_t Mask_InterleaveOdd_64 = 0b0101010101010101010101010101010101010101010101010101010101010101;
-constexpr uint32_t Mask_InterleaveEven_64 = 0b1010101010101010101010101010101010101010101010101010101010101010;
 
 int encode_leb128_bmi(uint8_t* pDest, uint32_t x)
 {
@@ -44,12 +42,12 @@ int encode_leb128_bmi(uint8_t* pDest, uint64_t x)
 
 uint32_t encode_morton_bmi(uint16_t a, uint16_t b)
 {
-    return _pdep_u32(a, Mask_InterleaveOdd_32) | _pdep_u32(b, Mask_InterleaveEven_32);
+    return _pdep_u32(a, Mask_InterleaveOdd_32) | _pdep_u32(b, ~Mask_InterleaveOdd_32);
 }
 
 uint64_t encode_morton_bmi(uint32_t a, uint32_t b)
 {
-    return _pdep_u64(a, Mask_InterleaveOdd_64) | _pdep_u64(b, Mask_InterleaveEven_64);
+    return _pdep_u64(a, Mask_InterleaveOdd_64) | _pdep_u64(b, ~Mask_InterleaveOdd_64);
 }
 
 uint32_t encode_zigzag_bmi(int32_t x)
