@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
     <OutDir>$(SolutionDir)\..\bin\$(Platform)-$(Configuration)\</OutDir>	
-    <IntermediateOutputPath>$(SolutionDir)\..\obj\$(ProjectName)\$(Platform)-$(Configuration)\</IntermediateOutputPath>	
-    <BaseIntermediateOutputPath>$(SolutionDir)\..\obj\$(ProjectName)\$(Platform)-$(Configuration)\</BaseIntermediateOutputPath>
+        <BaseIntermediateOutputPath>$(SolutionDir)\..\obj\$(Platform)-$(Configuration)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(MSBuildProjectName)</IntermediateOutputPath>	
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 </Project>
