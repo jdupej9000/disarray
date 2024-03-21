@@ -16,6 +16,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxpro
 		{D184D307-70E6-447A-B311-B2B7F5619402} = {D184D307-70E6-447A-B311-B2B7F5619402}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Experiments", "Experiments", "{F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -67,6 +69,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E0ABA16B-44A7-4210-AA78-A077746C3C1E} = {F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}
+		{FC07D3A3-1EB3-4F09-9FC7-FDD0952C5CD9} = {F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}
+		{C0596BBA-4546-4C44-87A4-BC6D29E44D2B} = {F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8FD979F4-A379-4CA2-AB7C-5160D462D4A6}
