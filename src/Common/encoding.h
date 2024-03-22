@@ -30,7 +30,7 @@ uint64_t encode_expgolomb(uint32_t x, int& bits)
 	uint32_t q = x >> N;
 	uint64_t r = x & ((1 << N) - 1);
 	bits = q + 1 + N;
-	return ((1 << q) - 1) | (r << (q + 1));
+	return ((1ull << q) - 1) | (r << (q + 1));
 }
 
 template<uint32_t N>
