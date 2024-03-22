@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <intrin.h>
 
 // Encode u64 or u32 using LEB128 into pDest and return the number of Bytes added.
 int encode_leb128_bmi(uint8_t* pDest, uint64_t x);
@@ -19,3 +20,23 @@ uint32_t encode_zigzag_bmi(int32_t x);
 uint64_t encode_zigzag_bmi(int64_t x);
 int32_t decode_zigzag_bmi(uint32_t x);
 int64_t decode_zigzag_bmi(uint64_t x);
+
+// Perform exp-Golomb encoding of x with M=2^N. The encoded value is returned
+// and number of bits used stored in bits. If bits>64 the function has failed
+// and te result is undefined. 
+template<uint32_t N>
+uint64_t encode_expgolomb(uint32_t x, int& bits)
+{
+	uint32_t q = x >> N;
+	uint64_t r = x & ((1 << N) - 1);
+	bits = q + 1 + N;
+	return ((r << (1 + q)) | 0x1) - 1;
+}
+
+template<uint32_t N>
+uint32_t decode_expgolomb_bmi(uint64_t x, int& bits)
+{
+	uint32_t q = _tzcnt_u64(~x);
+	uint32_t r = (x >> (q + 1)) & ((1 << N) - 1);
+	return (((uint64_t)q) << N) | r;
+}
