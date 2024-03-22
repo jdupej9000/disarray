@@ -23,14 +23,14 @@ int64_t decode_zigzag_bmi(uint64_t x);
 
 // Perform exp-Golomb encoding of x with M=2^N. The encoded value is returned
 // and number of bits used stored in bits. If bits>64 the function has failed
-// and te result is undefined. 
+// and the result is undefined. 
 template<uint32_t N>
 uint64_t encode_expgolomb(uint32_t x, int& bits)
 {
 	uint32_t q = x >> N;
 	uint64_t r = x & ((1 << N) - 1);
 	bits = q + 1 + N;
-	return ((r << (1 + q)) | 0x1) - 1;
+	return ((1 << q) - 1) | (r << (q + 1));
 }
 
 template<uint32_t N>
