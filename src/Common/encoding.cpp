@@ -11,6 +11,7 @@ constexpr uint64_t Mask_7b8b_64 = 0b01111111011111110111111101111111011111110111
 constexpr uint32_t Mask_InterleaveOdd_32 = 0b01010101010101010101010101010101;
 constexpr uint64_t Mask_InterleaveOdd_64 = 0b0101010101010101010101010101010101010101010101010101010101010101;
 
+
 int encode_leb128_bmi(uint8_t* pDest, uint32_t x)
 {
     int length = DivideBy7Rev_32[_lzcnt_u32(x)];
@@ -61,4 +62,64 @@ uint64_t encode_zigzag_bmi(int64_t x)
 {
     int64_t mask = x >> 63; // we need arithmetic shift here (MSVC is OK)
     return _rorx_u64(x, 63) ^ (mask << 1);
+}
+
+int decode_leb128_bmi(uint8_t* pSrc, uint32_t& x)
+{
+    uint64_t src = *(const uint64_t*)pSrc;
+    uint64_t maskBoundary = ~(src | Mask_7b8b_64);
+    uint64_t mask = _blsmsk_u64(maskBoundary); 
+    x = (uint32_t)_pext_u64(src & mask, Mask_7b8b_64);
+    return 1 + (_tzcnt_u64(maskBoundary) >> 3);
+}
+
+int decode_leb128_bmi(uint8_t* pSrc, uint64_t& x)
+{
+    const uint64_t src = *(const uint64_t*)pSrc;
+    const uint64_t maskBoundary = ~(src | Mask_7b8b_64);
+    
+    if (maskBoundary != 0)
+    {
+        const uint64_t mask = _blsmsk_u64(maskBoundary);
+        x = _pext_u64(src & mask, Mask_7b8b_64);
+        return 1 + (_tzcnt_u64(maskBoundary) >> 3);
+    }
+    else
+    {
+        const uint64_t srcHi = *(const uint64_t*)(pSrc + 8);
+        const uint64_t maskBoundaryHi = ~(srcHi | Mask_7b8b_64);
+        const uint64_t maskHi = _blsmsk_u64(maskBoundaryHi);
+        x = _pext_u64(src, Mask_7b8b_64) | (_pext_u64(srcHi & maskHi, Mask_7b8b_64) << 56);
+        return 9 + (_tzcnt_u64(maskBoundaryHi) >> 3);
+    }
+}
+
+void decode_morton_bmi(uint32_t x, uint16_t& a, uint16_t& b)
+{
+    a = _pext_u32(x, Mask_InterleaveOdd_32);
+    b = _pext_u32(x, ~Mask_InterleaveOdd_32);
+}
+
+void decode_morton_bmi(uint64_t x, uint32_t& a, uint32_t& b)
+{
+    a = _pext_u64(x, Mask_InterleaveOdd_64);
+    b = _pext_u64(x, ~Mask_InterleaveOdd_64);
+}
+
+
+int32_t decode_zigzag_bmi(uint32_t x)
+{
+    if (x & 0x1) return -1-(x >> 1);
+    return x >> 1;
+    //int32_t ret = _rorx_u32(x, 1);
+    //return ret ^ ((x << 31) - 1);
+}
+
+int64_t decode_zigzag_bmi(uint64_t x)
+{
+    // pending MSVC bug resolution
+    if (x & 0x1) return -1LL - (x >> 1);
+    return x >> 1;
+    //int64_t ret = _rorx_u64(x, 1);
+    //return ret ^ ((x << 63) - 1);
 }
