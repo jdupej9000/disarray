@@ -25,6 +25,15 @@ int encode_leb128_bmi(uint8_t* pDest, uint32_t x)
     return length + 1;
 }
 
+int decode_leb128_bmi(uint8_t* pSrc, uint32_t& x)
+{
+    uint64_t src = *(const uint64_t*)pSrc;
+    uint64_t maskBoundary = ~(src | Mask_7b8b_64);
+    uint64_t mask = _blsmsk_u64(maskBoundary);
+    x = (uint32_t)_pext_u64(src & mask, Mask_7b8b_64);
+    return 1 + (_tzcnt_u64(maskBoundary) >> 3);
+}
+
 int encode_leb128_bmi(uint8_t* pDest, uint64_t x)
 {
     int length = DivideBy7Rev_64[_lzcnt_u64(x)];
@@ -41,43 +50,11 @@ int encode_leb128_bmi(uint8_t* pDest, uint64_t x)
     return length + 1;
 }
 
-uint32_t encode_morton_bmi(uint16_t a, uint16_t b)
-{
-    return _pdep_u32(a, Mask_InterleaveOdd_32) | _pdep_u32(b, ~Mask_InterleaveOdd_32);
-}
-
-uint64_t encode_morton_bmi(uint32_t a, uint32_t b)
-{
-    return _pdep_u64(a, Mask_InterleaveOdd_64) | _pdep_u64(b, ~Mask_InterleaveOdd_64);
-}
-
-uint32_t encode_zigzag_bmi(int32_t x)
-{
-    int32_t mask = x >> 31; // we need arithmetic shift here (MSVC is OK)
-    return _rorx_u32(x, 31) ^ (mask << 1);
-    //return (x >= 0) ? (x << 1) : ((-x) << 1) | 0x1;
-}
-
-uint64_t encode_zigzag_bmi(int64_t x)
-{
-    int64_t mask = x >> 63; // we need arithmetic shift here (MSVC is OK)
-    return _rorx_u64(x, 63) ^ (mask << 1);
-}
-
-int decode_leb128_bmi(uint8_t* pSrc, uint32_t& x)
-{
-    uint64_t src = *(const uint64_t*)pSrc;
-    uint64_t maskBoundary = ~(src | Mask_7b8b_64);
-    uint64_t mask = _blsmsk_u64(maskBoundary); 
-    x = (uint32_t)_pext_u64(src & mask, Mask_7b8b_64);
-    return 1 + (_tzcnt_u64(maskBoundary) >> 3);
-}
-
 int decode_leb128_bmi(uint8_t* pSrc, uint64_t& x)
 {
     const uint64_t src = *(const uint64_t*)pSrc;
     const uint64_t maskBoundary = ~(src | Mask_7b8b_64);
-    
+
     if (maskBoundary != 0)
     {
         const uint64_t mask = _blsmsk_u64(maskBoundary);
@@ -94,10 +71,20 @@ int decode_leb128_bmi(uint8_t* pSrc, uint64_t& x)
     }
 }
 
+uint32_t encode_morton_bmi(uint16_t a, uint16_t b)
+{
+    return _pdep_u32(a, Mask_InterleaveOdd_32) | _pdep_u32(b, ~Mask_InterleaveOdd_32);
+}
+
 void decode_morton_bmi(uint32_t x, uint16_t& a, uint16_t& b)
 {
     a = _pext_u32(x, Mask_InterleaveOdd_32);
     b = _pext_u32(x, ~Mask_InterleaveOdd_32);
+}
+
+uint64_t encode_morton_bmi(uint32_t a, uint32_t b)
+{
+    return _pdep_u64(a, Mask_InterleaveOdd_64) | _pdep_u64(b, ~Mask_InterleaveOdd_64);
 }
 
 void decode_morton_bmi(uint64_t x, uint32_t& a, uint32_t& b)
@@ -106,13 +93,25 @@ void decode_morton_bmi(uint64_t x, uint32_t& a, uint32_t& b)
     b = _pext_u64(x, ~Mask_InterleaveOdd_64);
 }
 
+uint32_t encode_zigzag_bmi(int32_t x)
+{
+    int32_t mask = x >> 31; // we need arithmetic shift here (MSVC is OK)
+    return _rorx_u32(x, 31) ^ (mask << 1);
+    //return (x >= 0) ? (x << 1) : ((-x) << 1) | 0x1;
+}
 
 int32_t decode_zigzag_bmi(uint32_t x)
 {
-    if (x & 0x1) return -1-(x >> 1);
+    if (x & 0x1) return -1 - (x >> 1);
     return x >> 1;
     //int32_t ret = _rorx_u32(x, 1);
     //return ret ^ ((x << 31) - 1);
+}
+
+uint64_t encode_zigzag_bmi(int64_t x)
+{
+    int64_t mask = x >> 63; // we need arithmetic shift here (MSVC is OK)
+    return _rorx_u64(x, 63) ^ (mask << 1);
 }
 
 int64_t decode_zigzag_bmi(uint64_t x)
