@@ -38,5 +38,6 @@ uint32_t decode_expgolomb_bmi(uint64_t x, int& bits)
 {
 	uint32_t q = _tzcnt_u64(~x);
 	uint32_t r = (x >> (q + 1)) & ((1 << N) - 1);
+	bits = q + 1 + N;
 	return (((uint64_t)q) << N) | r;
 }
