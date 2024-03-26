@@ -25,6 +25,15 @@ namespace Tests
 			Assert::AreEqual(0xffffffffu, adds_rgba8(0xffffffffu, 0x01010101u));
 		}
 
+		TEST_METHOD(AddsRgba8Bmi)
+		{
+			Assert::AreEqual(0x00000000u, adds_rgba8_bmi(0x00000000u, 0x00000000u));
+			Assert::AreEqual(0x01000001u, adds_rgba8_bmi(0x01000000u, 0x00000001u));
+			Assert::AreEqual(0x000000ffu, adds_rgba8_bmi(0x000000deu, 0x000000abu));
+			Assert::AreEqual(0x00000000u, adds_rgba8_bmi(0x00000000u, 0x00000000u));
+			Assert::AreEqual(0xffffffffu, adds_rgba8_bmi(0xffffffffu, 0x01010101u));
+		}
+
 		TEST_METHOD(MidRgba8)
 		{
 			Assert::AreEqual(0x00000000u, mid_rgba8(0x00000000u, 0x00000000u));

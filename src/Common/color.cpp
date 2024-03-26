@@ -39,6 +39,14 @@ uint32_t lerp_rgba8_bmi(uint32_t a, uint32_t b, uint32_t t)
 
 uint32_t adds_rgba8(uint32_t a, uint32_t b)
 {
+	uint32_t nomsb = (a & ~Mask_Msb_32) + (b & ~Mask_Msb_32);
+	uint32_t ovf = (nomsb & a) | (nomsb & b) | (a & b);
+	ovf = ((ovf & Mask_Msb_32) >> 7) * 0xffu;
+	return ovf | nomsb | ((a | b) & Mask_Msb_32);
+}
+
+uint32_t adds_rgba8_bmi(uint32_t a, uint32_t b)
+{
 	uint64_t x = _pdep_u64(a, Mask_OddBytes_64) + _pdep_u64(b, Mask_OddBytes_64);
 	uint64_t xovf = ((x >> 8) & Mask_OddBytes_64) * 0xffu; // 0xff where saturation must occur
 	return (uint32_t)_pext_u64(x | xovf, Mask_OddBytes_64);

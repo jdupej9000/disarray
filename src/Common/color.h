@@ -15,3 +15,4 @@ uint32_t lerp_rgba8_bmi(uint32_t a, uint32_t b, uint32_t t);
 
 // Add packed RGBA8 values a+b and saturate each channel.
 uint32_t adds_rgba8(uint32_t a, uint32_t b);
+uint32_t adds_rgba8_bmi(uint32_t a, uint32_t b);
