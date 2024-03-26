@@ -1,16 +1,16 @@
-#include "cpu_info.h"
+#include "cpuinfo.h"
 #include <sstream>
 #include <intrin.h>
 
 using namespace std;
 
 
-CpuInfo g_cpu;
+cpuinfo_t g_cpu;
 
-void make_cpu_info(CpuInfo& info);
-void make_x86_base_info(CpuInfo& info);
-void make_x86_cpu_class(CpuInfo& inf);
-void make_x86_cpu_caps(CpuInfo& info);
+void make_cpu_info(cpuinfo_t& info);
+void make_x86_base_info(cpuinfo_t& info);
+void make_x86_cpu_class(cpuinfo_t& inf);
+void make_x86_cpu_caps(cpuinfo_t& info);
 
 constexpr bool is_bit(int v, int i)
 {
@@ -22,7 +22,7 @@ void init_cpu_info(void)
 	make_cpu_info(g_cpu);
 }
 
-const CpuInfo& get_cpu_info(void)
+const cpuinfo_t& get_cpu_info(void)
 {
 	return g_cpu;
 }
@@ -30,7 +30,7 @@ const CpuInfo& get_cpu_info(void)
 string get_cpu_instruction_list(void)
 {
 	stringstream ss;
-	const CpuInfo& i = g_cpu;
+	const cpuinfo_t& i = g_cpu;
 
 	if (i.m_sse) ss << "sse ";
 	if (i.m_sse2) ss << "sse2 ";
@@ -96,9 +96,9 @@ string get_cpu_instruction_list(void)
 	return ss.str();
 }
 
-void make_cpu_info(CpuInfo& info)
+void make_cpu_info(cpuinfo_t& info)
 {
-	memset(&info, 0, sizeof(CpuInfo));
+	memset(&info, 0, sizeof(cpuinfo_t));
 
 #ifdef _M_IA32		
 	info.m_arch = CPU_ARCH::x86;
@@ -121,7 +121,7 @@ void make_cpu_info(CpuInfo& info)
 #endif
 }
 
-void make_x86_base_info(CpuInfo& info)
+void make_x86_base_info(cpuinfo_t& info)
 {
 	int regs[4];
 	__cpuid(regs, 0x0);
@@ -150,7 +150,7 @@ void make_x86_base_info(CpuInfo& info)
 	}
 }
 
-void make_x86_cpu_caps(CpuInfo& info)
+void make_x86_cpu_caps(cpuinfo_t& info)
 {
 	int regs[4];
 	__cpuid(regs, 0x0);
@@ -246,7 +246,7 @@ void make_x86_cpu_caps(CpuInfo& info)
 		info.m_level = 0; // should not happen
 }
 
-void make_x86_cpu_class(CpuInfo& inf)
+void make_x86_cpu_class(cpuinfo_t& inf)
 {
 	CPU_CLASS ret = CPU_CLASS::unknown;
 
@@ -264,7 +264,7 @@ void make_x86_cpu_class(CpuInfo& inf)
 	family = (regs[0] >> 8) & 0xf;
 	ext_model = (regs[0] >> 16) & 0xf;
 	ext_family = (regs[0] >> 20) & 0xf;
-	
+
 	int full_family = ext_family << 4 | family;
 	int full_model = ext_model << 4 | model;
 	const char* pszCodeName = "";
@@ -274,7 +274,7 @@ void make_x86_cpu_class(CpuInfo& inf)
 
 	switch (CPUIDHASH(ret, full_family, full_model))
 	{
-		#include "x86-cpu-table.inc"
+#include "x86-cpu-table.inc"
 	}
 
 	strcpy_s(inf.m_codeName, MAX_CODENAME_LEN, pszCodeName);

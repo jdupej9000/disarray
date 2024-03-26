@@ -35,7 +35,7 @@ enum class CPU_CLASS : int
 constexpr size_t MAX_BRANDSTRING_LEN = 48;
 constexpr size_t MAX_CODENAME_LEN = 32;
 
-struct CpuInfo
+struct cpuinfo_t
 {
 	CPU_ARCH m_arch;
 	CPU_CLASS m_class;
@@ -123,9 +123,8 @@ struct CpuInfo
 };
 
 void init_cpu_info(void);
-const CpuInfo& get_cpu_info(void);
+const cpuinfo_t& get_cpu_info(void);
 std::string get_cpu_instruction_list(void);
 std::string arch_to_string(CPU_ARCH arch, short level);
 std::string class_to_string(CPU_CLASS arch);
 
-extern CpuInfo g_cpu;

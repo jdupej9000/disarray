@@ -30,6 +30,9 @@
     <ClInclude Include="color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cpuinfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="encoding.cpp">
@@ -41,5 +44,13 @@
     <ClCompile Include="color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cpuinfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="x86-cpu-table.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

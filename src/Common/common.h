@@ -4,3 +4,4 @@
 #include "encoding.h"
 #include "random.h"
 #include "color.h"
+#include "cpuinfo.h"
