@@ -8,5 +8,5 @@
 #define DSRY_CPP20
 #endif
 
-
+// If defined, the use of x86 BMI and BMI2 instructions is allowed.
 #define DSRY_BMI
