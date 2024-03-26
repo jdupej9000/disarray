@@ -3,6 +3,8 @@
 
 #include <limits.h>
 
+#define __rgba10(a,r,g,b) (uint32_t)(((a) << 30) | ((r) << 20) | ((g) << 10) | (b))
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace Tests
@@ -58,6 +60,26 @@ namespace Tests
 			Assert::AreEqual(0xffffffffu, lerp_rgba8_bmi(0x00000000u, 0xffffffff, 0x100));
 			Assert::AreEqual(0x7f7f7f7fu, lerp_rgba8_bmi(0x00000000u, 0xffffffff, 0x80));
 			Assert::AreEqual(0x10203040u, lerp_rgba8_bmi(0x00000000u, 0x20406080, 0x80));
+		}
+
+		TEST_METHOD(CvtRgba8Rgba10Bmi)
+		{
+			Assert::AreEqual(__rgba10(0, 0, 0, 0), cvt_rgba8_rgba10_bmi(0x00000000));
+			Assert::AreEqual(__rgba10(3, 0, 0, 0), cvt_rgba8_rgba10_bmi(0xff000000));
+			Assert::AreEqual(__rgba10(0, 0, 0, 0x3ff), cvt_rgba8_rgba10_bmi(0x000000ff));
+			Assert::AreEqual(__rgba10(0, 0, 0x3ff, 0), cvt_rgba8_rgba10_bmi(0x0000ff00));
+			Assert::AreEqual(__rgba10(0, 0x3ff, 0, 0), cvt_rgba8_rgba10_bmi(0x00ff0000));
+			Assert::AreEqual(__rgba10(0, 0x202, 0, 0), cvt_rgba8_rgba10_bmi(0x00800000));
+		}
+
+		TEST_METHOD(CvtRgba10Rgba8Bmi)
+		{
+			Assert::AreEqual(0x00000000u, cvt_rgba10_rgba8_bmi(__rgba10(0, 0, 0, 0)));
+			Assert::AreEqual(0xff000000u, cvt_rgba10_rgba8_bmi(__rgba10(3, 0, 0, 0)));
+			Assert::AreEqual(0x000000ffu, cvt_rgba10_rgba8_bmi(__rgba10(0, 0, 0, 0x3ff)));
+			Assert::AreEqual(0x0000ff00u, cvt_rgba10_rgba8_bmi(__rgba10(0, 0, 0x3ff, 0)));
+			Assert::AreEqual(0x00ff0000u, cvt_rgba10_rgba8_bmi(__rgba10(0, 0x3ff, 0, 0)));
+			Assert::AreEqual(0x00800000u, cvt_rgba10_rgba8_bmi(__rgba10(0, 0x202, 0, 0)));
 		}
 	};
 
