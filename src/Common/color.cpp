@@ -1,6 +1,9 @@
 #include "color.h"
 #include <intrin.h>
 
+
+//https://poynton.ca/PDFs/coloureq.pdf
+
 constexpr uint32_t Mask_NoLsb_32 = 0xfefefefeu;
 constexpr uint32_t Mask_Msb_32 = 0x80808080u;
 constexpr uint32_t Mask_OddBytes_32 = 0x00ff00ffu;
@@ -40,13 +43,3 @@ uint32_t adds_rgba8(uint32_t a, uint32_t b)
 	uint64_t xovf = ((x >> 8) & Mask_OddBytes_64) * 0xffu; // 0xff where saturation must occur
 	return (uint32_t)_pext_u64(x | xovf, Mask_OddBytes_64);
 }
-
-/*uint32_t alphablend_over_rgba8premul(uint32_t a, uint32_t b)
-{
-	// TODO: test
-	uint32_t alpha = (a >> 24) + (a >> 31); // 0 <= alpha <= 256
-	uint64_t ba = _pdep_u64(b, Mask_OddBytes_64) * (256 - alpha);
-	uint64_t x = _pdep_u64(a, Mask_OddBytes_64) + (ba >> 8);
-	uint64_t xovf = ((x >> 8) & Mask_OddBytes_64) * 0xffu; // 0xff where saturation must occur
-	return (uint32_t)_pext_u64(x | xovf, Mask_OddBytes_64);
-}*/
