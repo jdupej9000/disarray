@@ -18,11 +18,11 @@ namespace Tests
 
 		TEST_METHOD(AddsRgba8)
 		{
-			Assert::AreEqual(0x00000000u, adds_rgba8(0x00000000u, 0x00000000u));
-			Assert::AreEqual(0x01000001u, adds_rgba8(0x01000000u, 0x00000001u));
-			Assert::AreEqual(0x000000ffu, adds_rgba8(0x000000deu, 0x000000abu));
-			Assert::AreEqual(0x00000000u, adds_rgba8(0x00000000u, 0x00000000u));
-			Assert::AreEqual(0xffffffffu, adds_rgba8(0xffffffffu, 0x01010101u));
+			Assert::AreEqual(0x00000000u, adds_rgba8_(0x00000000u, 0x00000000u));
+			Assert::AreEqual(0x01000001u, adds_rgba8_(0x01000000u, 0x00000001u));
+			Assert::AreEqual(0x000000ffu, adds_rgba8_(0x000000deu, 0x000000abu));
+			Assert::AreEqual(0x00000000u, adds_rgba8_(0x00000000u, 0x00000000u));
+			Assert::AreEqual(0xffffffffu, adds_rgba8_(0xffffffffu, 0x01010101u));
 		}
 
 		TEST_METHOD(AddsRgba8Bmi)
@@ -46,10 +46,10 @@ namespace Tests
 
 		TEST_METHOD(LerpRgba8)
 		{
-			Assert::AreEqual(0x00000000u, lerp_rgba8(0x00000000u, 0xffffffff, 0x00));
-			Assert::AreEqual(0xffffffffu, lerp_rgba8(0x00000000u, 0xffffffff, 0x100));
-			Assert::AreEqual(0x7f7f7f7fu, lerp_rgba8(0x00000000u, 0xffffffff, 0x80));
-			Assert::AreEqual(0x10203040u, lerp_rgba8(0x00000000u, 0x20406080, 0x80));
+			Assert::AreEqual(0x00000000u, lerp_rgba8_(0x00000000u, 0xffffffff, 0x00));
+			Assert::AreEqual(0xffffffffu, lerp_rgba8_(0x00000000u, 0xffffffff, 0x100));
+			Assert::AreEqual(0x7f7f7f7fu, lerp_rgba8_(0x00000000u, 0xffffffff, 0x80));
+			Assert::AreEqual(0x10203040u, lerp_rgba8_(0x00000000u, 0x20406080, 0x80));
 		}
 
 		TEST_METHOD(LerpRgba8Bmi)

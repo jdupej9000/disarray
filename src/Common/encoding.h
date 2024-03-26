@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include <stdint.h>
 #include <intrin.h>
 
@@ -41,3 +42,26 @@ uint32_t decode_expgolomb_bmi(uint64_t x, int& bits)
 	bits = q + 1 + N;
 	return (((uint64_t)q) << N) | r;
 }
+
+#if defined(DSRY_BMI)
+
+#define encode_leb128 encode_leb128_bmi
+#define decode_leb128 decode_leb128_bmi
+#define encode_morton encode_morton_bmi
+#define decode_morton decode_morton_bmi
+#define encode_zigzag encode_zigzag_bmi
+#define decode_zigzag decode_zigzag_bmi
+#define decode_expgolomb decode_expgolomb_bmi
+
+#else
+
+#pragma message ("encoding.h uses BMI despite DSRY_BMI being not defined.")
+#define encode_leb128 encode_leb128_bmi
+#define decode_leb128 decode_leb128_bmi
+#define encode_morton encode_morton_bmi
+#define decode_morton decode_morton_bmi
+#define encode_zigzag encode_zigzag_bmi
+#define decode_zigzag decode_zigzag_bmi
+#define decode_expgolomb decode_expgolomb_bmi
+
+#endif

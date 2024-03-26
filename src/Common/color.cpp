@@ -19,7 +19,7 @@ uint32_t mid_rgba8(uint32_t a, uint32_t b)
 	return (a | b) - (((a ^ b) & Mask_NoLsb_32) >> 1);
 }
 
-uint32_t lerp_rgba8(uint32_t a, uint32_t b, uint32_t t)
+uint32_t lerp_rgba8_(uint32_t a, uint32_t b, uint32_t t)
 {
 	uint32_t rb = (a & Mask_OddBytes_32) * (256 - t);
 	rb += (b & Mask_OddBytes_32) * t;
@@ -37,7 +37,7 @@ uint32_t lerp_rgba8_bmi(uint32_t a, uint32_t b, uint32_t t)
 	return (uint32_t)_pext_u64(x, ~Mask_OddBytes_64);
 }
 
-uint32_t adds_rgba8(uint32_t a, uint32_t b)
+uint32_t adds_rgba8_(uint32_t a, uint32_t b)
 {
 	uint32_t nomsb = (a & ~Mask_Msb_32) + (b & ~Mask_Msb_32);
 	uint32_t ovf = (nomsb & a) | (nomsb & b) | (a & b);
