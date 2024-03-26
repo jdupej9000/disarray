@@ -25,12 +25,14 @@
     <ClInclude Include="cpuinfo.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="random.h" />
+    <ClInclude Include="system.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
     <ClCompile Include="cpuinfo.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="random.cpp" />
+    <ClCompile Include="system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="x86-cpu-table.inc" />
