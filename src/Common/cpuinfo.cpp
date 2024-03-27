@@ -258,7 +258,7 @@ namespace dsry::system
 		__cpuid(regs, 0x0);
 		if (regs[1] == 0x756e6547 && regs[2] == 0x6c65746e && regs[3] == 0x49656e69) // "GenuineIntel"
 			ret = CPU_CLASS::intel;
-		else // TODO: check for "AuthenticAMD"
+		else if (regs[1] == 0x68747541 && regs[2] == 0x444d4163 && regs[3] == 0x69746e65) // "AuthenticAMD"
 			ret = CPU_CLASS::amd;
 
 		int family = 0, model = 0, stepping = 0, ext_model = 0, ext_family = 0;

@@ -26,12 +26,14 @@
     <ClInclude Include="encoding.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="system.h" />
+    <ClInclude Include="text.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
     <ClCompile Include="cpuinfo.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="random.cpp" />
+    <ClCompile Include="text.cpp" />
     <ClCompile Include="system.cpp" />
   </ItemGroup>
   <ItemGroup>

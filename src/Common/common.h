@@ -5,3 +5,4 @@
 #include "random.h"
 #include "color.h"
 #include "cpuinfo.h"
+#include "text.h"
