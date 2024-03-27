@@ -83,6 +83,7 @@ namespace dsry::system
 		uint32_t m_avx_vnni_int8 : 1;
 		uint32_t m_avx_vnni_int16 : 1;
 		uint32_t m_fp16 : 1;
+		uint32_t m_gfni : 1;
 		uint32_t : 0;
 
 		uint32_t m_aes : 1;

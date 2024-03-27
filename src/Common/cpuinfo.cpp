@@ -48,6 +48,7 @@ namespace dsry::system
 		if (i.m_avx_vnni_int16) ss << "avx.vnni.int16 ";
 		if (i.m_avx_ifma) ss << "avx.ifma ";
 		if (i.m_avx_ne_cvt) ss << "avx.ne.cvt ";
+		if (i.m_gfni) ss << "gfni ";
 
 		if (i.m_cmov) ss << "cmov ";
 		if (i.m_cx8) ss << "cx8 ";
@@ -205,6 +206,7 @@ namespace dsry::system
 		info.m_sha = is_bit(regs[1], 29);
 		info.m_vaes = is_bit(regs[2], 9);
 		info.m_hybrid = is_bit(regs[3], 15);
+		info.m_gfni = is_bit(regs[2], 8);
 
 		__cpuidex(regs, 7, 1);
 		info.m_sha512 = is_bit(regs[0], 0);
