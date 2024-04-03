@@ -28,6 +28,10 @@ sample_fun_x64 proc
 	
 _sample_fun_x64_outer:
 	mov			r12, [rsi + 16]
+	mov			rcx, r12
+	mov			rdx, r14
+	call		rdi
+
 	xor			r13, r13
 
 _sample_fun_x64_inner:
