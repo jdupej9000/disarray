@@ -1,5 +1,5 @@
-public measure_fun2_x64
 public sample_fun_x64
+public measure_fun_x64
 
 .data
 .code
@@ -76,11 +76,10 @@ _sample_fun_x64_inner:
 align 8
 sample_fun_x64 endp
 
-
-;;;
+; --------------------------------------------------------------------------------------------
 
 align 8
-measure_fun2_x64 proc
+measure_fun_x64 proc
 
 	push		rsi		; tick count accumulator
 	push		rdi		; tick count in iteration
@@ -92,7 +91,7 @@ measure_fun2_x64 proc
 	mov			r15, rdx
 	xor			rsi, rsi
 
-_measure_fun2_x64_1:
+_measure_fun_x64_1:
 	mov			rcx, r12		; DUT 1st arg. -> rcx
 
 	rdtsc						; time -> rdi
@@ -112,7 +111,7 @@ _measure_fun2_x64_1:
 	add			rsi, rdx
 
 	dec			r12				; decrement counter and repeat if needed
-	jnz			_measure_fun2_x64_1
+	jnz			_measure_fun_x64_1
 
 	mov			rax, rsi		; set return value
 
@@ -126,6 +125,6 @@ _measure_fun2_x64_1:
 	ret
 
 align 8
-measure_fun2_x64 endp
+measure_fun_x64 endp
 
 end

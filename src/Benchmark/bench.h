@@ -13,7 +13,7 @@ struct benchtask
 };
 
 extern "C" uint64_t sample_fun_x64(benchtask* pbt);
-extern "C" uint64_t measure_fun2_x64(uint64_t reps, void* funPtr);
+extern "C" uint64_t measure_fun_x64(void* fun, uint64_t reps);
 
 namespace dsry::bench
 {
@@ -43,28 +43,27 @@ namespace dsry::bench
 		return 0;
 	}
 
-	template<typename TRet>
-	benchres measure(TRet(*dut)(uint32_t, uint32_t), TRet(*ctl)(uint64_t) = blank<TRet>)
+	uint64_t estimate_reps(void* dut, uint64_t nsTarget)
 	{
-		volatile TRet noopt = 0;
+		constexpr uint64_t MaxCount = 1 << 30;
+		uint64_t count = 1;
+
+		while (count < MaxCount)
+		{
+			if (measure_fun_x64(dut, count) >= nsTarget)
+				return count;
+
+			count <<= 1;
+		}
+
+		return count;
+	}
+
+	template<typename TRet, typename ...TArgs>
+	void bench(TRet(*dut)(TArgs...), void(*gen)(TArgs&...)=nullptr)
+	{
 		
-		uint64_t numRep = 100000000;
-
-		uint64_t totalNanosOverhead = measure_fun2_x64(numRep, (void*)ctl);
-		uint64_t totalNanos = measure_fun2_x64(numRep, (void*)dut);
-
-		if (totalNanosOverhead > totalNanos)
-			totalNanosOverhead = totalNanos;
-
-		benchres ret{};
-		ret.reps = numRep;
-		ret.dut_ns = totalNanos;
-		ret.ovr_ns = totalNanosOverhead;
-		ret.secsPerRepClean = 1e-9 * (double)(totalNanos - totalNanosOverhead) / (double)numRep;
-		ret.dummy = noopt;
-
-		return ret;
-	};
+	}
 
 	benchres2 measure(void* dut, void* ctl = blank<uint32_t>)
 	{
