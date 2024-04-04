@@ -67,7 +67,7 @@ namespace dsry::bench
 	}
 
 	template<typename TRet, typename ...TArgs>
-	benchresult bench(TRet(*dut)(TArgs...), void(*gen)(TArgs&...)=nullptr)
+	benchresult bench(TRet(*dut)(TArgs...), void(*gen)(uint64_t, TArgs&...)=nullptr)
 	{
 		constexpr uint64_t OptimalRuntimeNs = 1000000000ull;
 		constexpr uint64_t OptimalSets = 1024;

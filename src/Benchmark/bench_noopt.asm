@@ -1,3 +1,5 @@
+.model flat
+
 public sample_fun_x64
 public measure_fun_x64
 
@@ -10,6 +12,97 @@ public measure_fun_x64
 ; must preserve : r12-15, rdi, rsi, rbx, rbp, ymm6-15
 ; 
 ; rdtsc -> edx:eax
+
+align 8
+sample_fungen_x64 proc
+	
+	push		rsi
+	push		rdi
+	push		r12				; scratch
+	push		r13				; time accumulator
+	push		r14				; outer counter
+	push		r15
+
+								; TODO: align the stack
+	sub			esp, 96			; 3 variables, 32B each (to fit a YMM reg)
+
+	mov			rsi, rcx		; benchtask*
+	mov			rdi, [rsi]		; fnptr
+	xor			r14, r14
+	
+_sample_fungen_x64_outer:
+
+	lea			rdx, [esp - 32]
+	lea			r8, [esp - 64]
+	lea			r9, [esp - 96]
+	mov			rcx, r14
+	mov			r12, [rsi + 32]	; genfnptr
+	call		r12				; invoke the generator
+
+	mov			r12, [rsi + 16]
+	
+	mov			rcx, [esp - 32]
+	vmovups		ymm0, [esp - 32]
+	mov			rdx, [esp - 64]
+	vmovups		ymm1, [esp - 64]
+	mov			r8, [esp - 96]
+	vmovups		ymm2, [esp - 96]
+	call		rdi				; call dut, to make sure its code is cached
+
+	xor			r13, r13
+
+_sample_fungen_x64_inner:
+	mov			rcx, [esp - 32]
+	vmovups		ymm0, [esp - 32]
+	mov			r9, [esp - 64]
+	vmovups		ymm1, [esp - 64]
+	mov			r8, [esp - 96]
+	vmovups		ymm2, [esp - 96]
+	
+	lfence						; make sure that argument loads have completed
+
+	rdtsc
+	shl			rdx, 32
+	or			rdx, rax
+	mov			r15, rdx
+
+	mov			rdx, r9			; second GP argument (rdx)
+	call		rdi
+
+	rdtsc						
+	shl			rdx, 32			
+	or			rdx, rax
+	xor			rcx, rcx
+	sub			rdx, r15
+	cmovo		rdx, rcx		
+	add			r13, rdx
+	
+	dec			r12
+	jnz			_sample_fungen_x64_inner
+
+	mov			r12, [rsi + 8]	; benchtask->times
+	mov			[r12 + 8 * r14], r13
+	inc			r14
+	
+	mov			r12, [rsi + 24]
+	cmp			r14, r12
+	jb			_sample_fungen_x64_outer
+
+	add			esp, 96
+
+	pop			r15
+	pop			r14
+	pop			r13
+	pop			r12
+	pop			rdi
+	pop			rsi
+
+	ret
+
+align 8
+sample_fun_x64 endp
+
+; --------------------------------------------------------------------------------------------
 
 
 align 8
