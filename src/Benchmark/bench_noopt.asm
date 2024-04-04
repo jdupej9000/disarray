@@ -1,5 +1,4 @@
-.model flat
-
+public sample_fungen_x64
 public sample_fun_x64
 public measure_fun_x64
 
@@ -24,7 +23,7 @@ sample_fungen_x64 proc
 	push		r15
 
 								; TODO: align the stack
-	sub			esp, 96			; 3 variables, 32B each (to fit a YMM reg)
+	sub			rsp, 96			; 3 variables, 32B each (to fit a YMM reg)
 
 	mov			rsi, rcx		; benchtask*
 	mov			rdi, [rsi]		; fnptr
@@ -32,32 +31,32 @@ sample_fungen_x64 proc
 	
 _sample_fungen_x64_outer:
 
-	lea			rdx, [esp - 32]
-	lea			r8, [esp - 64]
-	lea			r9, [esp - 96]
+	lea			rdx, [rsp]
+	lea			r8, [rsp + 32]
+	lea			r9, [rsp + 64]
 	mov			rcx, r14
 	mov			r12, [rsi + 32]	; genfnptr
 	call		r12				; invoke the generator
 
 	mov			r12, [rsi + 16]
 	
-	mov			rcx, [esp - 32]
-	vmovups		ymm0, [esp - 32]
-	mov			rdx, [esp - 64]
-	vmovups		ymm1, [esp - 64]
-	mov			r8, [esp - 96]
-	vmovups		ymm2, [esp - 96]
+	mov			rcx, [rsp]
+	vmovups		ymm0, [rsp]
+	mov			rdx, [rsp + 32]
+	vmovups		ymm1, [rsp + 32]
+	mov			r8, [rsp + 64]
+	vmovups		ymm2, [rsp + 64]
 	call		rdi				; call dut, to make sure its code is cached
 
 	xor			r13, r13
 
 _sample_fungen_x64_inner:
-	mov			rcx, [esp - 32]
-	vmovups		ymm0, [esp - 32]
-	mov			r9, [esp - 64]
-	vmovups		ymm1, [esp - 64]
-	mov			r8, [esp - 96]
-	vmovups		ymm2, [esp - 96]
+	mov			rcx, [rsp]
+	vmovups		ymm0, [rsp]
+	mov			r9, [rsp + 32]
+	vmovups		ymm1, [rsp + 32]
+	mov			r8, [rsp + 64]
+	vmovups		ymm2, [rsp + 64]
 	
 	lfence						; make sure that argument loads have completed
 
@@ -88,7 +87,7 @@ _sample_fungen_x64_inner:
 	cmp			r14, r12
 	jb			_sample_fungen_x64_outer
 
-	add			esp, 96
+	add			rsp, 96
 
 	pop			r15
 	pop			r14
@@ -100,7 +99,7 @@ _sample_fungen_x64_inner:
 	ret
 
 align 8
-sample_fun_x64 endp
+sample_fungen_x64 endp
 
 ; --------------------------------------------------------------------------------------------
 
@@ -180,8 +179,8 @@ measure_fun_x64 proc
 	push		r15		; DUT proc address
 
 	vzeroupper
-	mov			r12, rcx
-	mov			r15, rdx
+	mov			r12, rdx
+	mov			r15, rcx
 	xor			rsi, rsi
 
 _measure_fun_x64_1:

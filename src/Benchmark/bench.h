@@ -13,7 +13,8 @@ struct benchtask
 	void* genfnptr;
 };
 
-extern "C" uint64_t sample_fun_x64(benchtask* pbt);
+extern "C" void sample_fungen_x64(benchtask* pbt);
+extern "C" void sample_fun_x64(benchtask* pbt);
 extern "C" uint64_t measure_fun_x64(void* fun, uint64_t reps);
 
 namespace dsry::bench
@@ -52,7 +53,7 @@ namespace dsry::bench
 
 	uint64_t estimate_reps(void* dut, uint64_t nsTarget)
 	{
-		constexpr uint64_t MaxCount = 1 << 30;
+		constexpr uint64_t MaxCount = 1 << 27;
 		uint64_t count = 1;
 
 		while (count < MaxCount)
@@ -66,10 +67,11 @@ namespace dsry::bench
 		return count;
 	}
 
-	template<typename TRet, typename ...TArgs>
-	benchresult bench(TRet(*dut)(TArgs...), void(*gen)(uint64_t, TArgs&...)=nullptr)
+	template<typename TRet, typename... TArgs>
+	//benchresult bench(typename TRet(*dut)(TArgs...), typename void(*gen)(uint64_t, TArgs&...)=nullptr)
+	benchresult bench(TRet(*dut)(TArgs...), void* gen = nullptr)
 	{
-		constexpr uint64_t OptimalRuntimeNs = 1000000000ull;
+		constexpr uint64_t OptimalRuntimeNs = 100000000ull;
 		constexpr uint64_t OptimalSets = 1024;
 
 		uint64_t optimalTotalReps = estimate_reps(dut, OptimalRuntimeNs);
@@ -86,11 +88,18 @@ namespace dsry::bench
 
 		bt.times = timeCtl;
 		bt.fnptr = blank<uint32_t>;
-		sample_fun_x64(&bt);
+
+		if (gen)
+			sample_fungen_x64(&bt);
+		else
+			sample_fun_x64(&bt);
 
 		bt.times = timeDut;
 		bt.fnptr = dut;
-		sample_fun_x64(&bt);
+		if (gen)
+			sample_fungen_x64(&bt);
+		else
+			sample_fun_x64(&bt);
 
 		std::sort(timeCtl, timeCtl + numSets);
 		std::sort(timeDut, timeDut + numSets);

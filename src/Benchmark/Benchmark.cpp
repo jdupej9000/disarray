@@ -14,6 +14,17 @@ using namespace dsry::bench;
 void print_benchres(const char* name, const benchres& br);
 void print_benchres2(const char* name, const benchres2& br);
 
+void gen_simple_ee(uint64_t i, uint32_t& a, uint32_t& b)
+{
+	a = b = (uint32_t)i;
+}
+
+void gen_simple_eeb(uint64_t i, uint32_t& a, uint32_t& b, uint32_t& c)
+{
+	a = b = (uint32_t)i;
+	c = i & 0xff;
+}
+
 int main()
 {
 	::SetPriorityClass(::GetCurrentProcess(), HIGH_PRIORITY_CLASS);
@@ -27,21 +38,39 @@ int main()
 
 	while (1)
 	{
-		//benchres br0 = measure<uint32_t>(dsry::color::adds_rgba8_);
-		//benchres br1 = measure<uint32_t>(dsry::color::adds_rgba8_bmi);
-
-		//print_benchres("adds_rgba8_", br0);
-		//print_benchres("adds_rgba8_bmi", br1);
-
-		benchres2 br0 = measure((void*)&dsry::color::adds_rgba8_);
-		benchres2 br1 = measure((void*)&dsry::color::adds_rgba8_bmi);
-		benchres2 br2 = measure((void*)&dsry::color::mid_rgba8);
-
-		cout << br0.timeAvg * 1e9 << ", " << br1.timeAvg * 1e9 << ", " << br2.timeAvg * 1e9 << endl;
+		benchresult br0 = bench<uint32_t, uint32_t, uint32_t>(
+			dsry::color::adds_rgba8_, 
+			gen_simple_ee);
 		
-		//print_benchres2("adds_rgba8_", br0);
-		//print_benchres2("adds_rgba8_bmi", br1);
-		//print_benchres2("mid_rgba8", br2);
+		cout.precision(2);
+		cout << fixed;
+		cout << "adds_rgba8_   : " << br0.timeMean * 1e9 << "ns, " << br0.totalRuns << " runs" << endl;
+
+		benchresult br1 = bench<uint32_t, uint32_t, uint32_t>(
+			dsry::color::adds_rgba8_bmi,
+			gen_simple_ee);
+
+		cout << "adds_rgba8_bmi: " << br1.timeMean * 1e9 << "ns, " << br1.totalRuns << " runs" << endl;
+
+		benchresult br2 = bench<uint32_t, uint32_t, uint32_t>(
+			dsry::color::mid_rgba8,
+			gen_simple_ee);
+
+		cout << "mid_rgba8     : " << br2.timeMean * 1e9 << "ns, " << br2.totalRuns << " runs" << endl;
+
+		benchresult br3 = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
+			dsry::color::lerp_rgba8_,
+			gen_simple_eeb);
+
+		cout << "lerp_rgba8_   : " << br3.timeMean * 1e9 << "ns, " << br3.totalRuns << " runs" << endl;
+
+		benchresult br4 = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
+			dsry::color::lerp_rgba8_bmi,
+			gen_simple_eeb);
+
+		cout << "lerp_rgba8_bmi: " << br4.timeMean * 1e9 << "ns, " << br4.totalRuns << " runs" << endl;
+
+		cout << endl;
 	}
 }
 

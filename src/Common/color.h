@@ -29,10 +29,10 @@ namespace dsry::color
 
 #if defined(DSRY_BMI)
 
-#define lerp_rgba8 lerp_rgba8_bmi
-#define adds_rgba8 adds_rgba8_bmi
-#define cvt_rgba8_rgba10 cvt_rgba8_rgba10_bmi
-#define cvt_rgba10_rgba8 cvt_rgba10_rgba8_bmi
+//#define lerp_rgba8 lerp_rgba8_bmi
+//#define adds_rgba8 adds_rgba8_bmi
+//#define cvt_rgba8_rgba10 cvt_rgba8_rgba10_bmi
+//#define cvt_rgba10_rgba8 cvt_rgba10_rgba8_bmi
 
 #else
 
