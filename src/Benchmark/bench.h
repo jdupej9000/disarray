@@ -52,10 +52,12 @@ namespace dsry::bench
 		return 0;
 	}
 
+	
 
 	template<typename TRet, typename... TArgs>
 	//benchresult bench(typename TRet(*dut)(TArgs...), typename void(*gen)(uint64_t, TArgs&...)=nullptr)
 	benchresult bench(TRet(*dut)(TArgs...), void* gen = nullptr)
+	//benchresult bench(TDut* dut, void* gen = nullptr)
 	{
 		constexpr int64_t OptimalRuntimeNs = 200000000ull;
 		constexpr int64_t OptimalSets = 65536;
@@ -73,7 +75,7 @@ namespace dsry::bench
 		bt.genfnptr = gen;
 
 		bt.times = timeCtl;
-		bt.fnptr = blank<TRet, TArgs...>;
+		bt.fnptr = blank<uint32_t, uint32_t>;
 
 		if (gen)
 			sample_fungen_x64(&bt);

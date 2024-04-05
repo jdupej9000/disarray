@@ -11,9 +11,16 @@
 using namespace std;
 using namespace dsry::bench;
 
+static const char* pszTPlanaHath = "Logic is the cement of our civilization with which we ascend from chaos, using reason as our guide.";
+
 void print_benchres(const char* name, const benchres& br);
 void print_benchres2(const char* name, const benchres2& br);
 void print_br(const char* name, const benchresult& br);
+
+void gen_strlen(uint64_t i, const char*& x)
+{
+	x = pszTPlanaHath;
+}
 
 void gen_simple_ee(uint64_t i, uint32_t& a, uint32_t& b)
 {
@@ -44,34 +51,39 @@ int main()
 
 	uint8_t dest[64];
 
+
 	while (1)
 	{
-		benchresult br = bench<uint32_t, uint32_t, uint32_t>(
+		benchresult br = bench(
 			blank<uint32_t, uint32_t, uint32_t>);
 			//gen_simple_eeb);
 		print_br("blank", br);
 
-		br = bench<uint32_t, uint32_t, uint32_t>(
+		//br = bench(strlen, gen_strlen);
+		//gen_simple_ee);
+		//print_br("strlen", br);
+
+		br = bench(
 			dsry::color::adds_rgba8_);
 			//gen_simple_ee);
 		print_br("adds_rgba8_", br);
 
-		br = bench<uint32_t, uint32_t, uint32_t>(
+		br = bench(
 			dsry::color::adds_rgba8_bmi);
 			//gen_simple_ee);
 		print_br("adds_rgba8_bmi", br);
 
-		br = bench<uint32_t, uint32_t, uint32_t>(
+		br = bench(
 			dsry::color::mid_rgba8);
 			//gen_simple_ee);
 		print_br("mid_rgba8", br);
 	
-		br = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
+		br = bench(
 			dsry::color::lerp_rgba8_);
 			//gen_simple_eeb);
 		print_br("lerp_rgba8_", br);
 		
-		br = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
+		br = bench(
 			dsry::color::lerp_rgba8_bmi);
 			//gen_simple_eeb);
 		print_br("lerp_rgba8_bmi", br);
@@ -81,7 +93,6 @@ int main()
 
 		br = bench(dsry::color::cvt_rgba10_rgba8_bmi);
 		print_br("cvt_rgba10_rgba8_bmi", br);
-
 	
 		cout << endl;
 	}
