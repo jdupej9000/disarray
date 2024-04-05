@@ -50,6 +50,7 @@ namespace dsry::encoding
 
 #if defined(DSRY_BMI)
 
+/*
 #define encode_leb128 encode_leb128_bmi
 #define decode_leb128 decode_leb128_bmi
 #define encode_morton encode_morton_bmi
@@ -57,6 +58,7 @@ namespace dsry::encoding
 #define encode_zigzag encode_zigzag_bmi
 #define decode_zigzag decode_zigzag_bmi
 #define decode_expgolomb decode_expgolomb_bmi
+*/
 
 #else
 

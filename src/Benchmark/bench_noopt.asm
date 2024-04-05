@@ -51,24 +51,22 @@ _sample_fungen_x64_outer:
 	xor			r13, r13
 
 _sample_fungen_x64_inner:
-	mov			rcx, [rsp]
 	vmovups		ymm0, [rsp]
 	mov			r9, [rsp + 32]
 	vmovups		ymm1, [rsp + 32]
 	mov			r8, [rsp + 64]
 	vmovups		ymm2, [rsp + 64]
 	
-	lfence						; make sure that argument loads have completed
-
-	rdtsc
+	rdtscp
 	shl			rdx, 32
 	or			rdx, rax
 	mov			r15, rdx
 
+	mov			rcx, [rsp]
 	mov			rdx, r9			; second GP argument (rdx)
 	call		rdi
 
-	rdtsc						
+	rdtscp	
 	shl			rdx, 32			
 	or			rdx, rax
 	xor			rcx, rcx
@@ -127,17 +125,21 @@ _sample_fun_x64_outer:
 	xor			r13, r13
 
 _sample_fun_x64_inner:
-	mov			rcx, r12
 
-	rdtsc
+	xor			r8, r8
+	xor			r9, r9
+
+	rdtscp
 	shl			rdx, 32
 	or			rdx, rax
 	mov			r15, rdx
 
-	mov			rdx, r14
+	xor			rcx, rcx
+	xor			rdx, rdx
 	call		rdi
 
-	rdtsc						
+	rdtscp
+	lfence
 	shl			rdx, 32			
 	or			rdx, rax
 	xor			rcx, rcx

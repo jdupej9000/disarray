@@ -13,6 +13,7 @@ using namespace dsry::bench;
 
 void print_benchres(const char* name, const benchres& br);
 void print_benchres2(const char* name, const benchres2& br);
+void print_br(const char* name, const benchresult& br);
 
 void gen_simple_ee(uint64_t i, uint32_t& a, uint32_t& b)
 {
@@ -32,48 +33,69 @@ int main()
 	//::SetThreadAffinityMask(::GetCurrentThread(), 0x4);
 	::SwitchToThread();
 
-	measure((void*)&dsry::color::adds_rgba8_);
+	bench_init();
+	cout << "TSC duration: " << get_tsc_duration() * 1.0e9 << "ns (" << 1.0e-9 / get_tsc_duration() << "GHz)" << endl;
 
-	cout << "adds_rgba8_, adds_rgba8_bmi, mid_rgba8" << endl;
+	//bench(dsry::color::lerp_rgba8_bmi);
+
+	//return 0;
+
+	cout << endl;
+
+	uint8_t dest[64];
 
 	while (1)
 	{
-		benchresult br0 = bench<uint32_t, uint32_t, uint32_t>(
-			dsry::color::adds_rgba8_, 
-			gen_simple_ee);
+		benchresult br = bench<uint32_t, uint32_t, uint32_t>(
+			blank<uint32_t, uint32_t, uint32_t>);
+			//gen_simple_eeb);
+		print_br("blank", br);
+
+		br = bench<uint32_t, uint32_t, uint32_t>(
+			dsry::color::adds_rgba8_);
+			//gen_simple_ee);
+		print_br("adds_rgba8_", br);
+
+		br = bench<uint32_t, uint32_t, uint32_t>(
+			dsry::color::adds_rgba8_bmi);
+			//gen_simple_ee);
+		print_br("adds_rgba8_bmi", br);
+
+		br = bench<uint32_t, uint32_t, uint32_t>(
+			dsry::color::mid_rgba8);
+			//gen_simple_ee);
+		print_br("mid_rgba8", br);
+	
+		br = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
+			dsry::color::lerp_rgba8_);
+			//gen_simple_eeb);
+		print_br("lerp_rgba8_", br);
 		
-		cout.precision(2);
-		cout << fixed;
-		cout << "adds_rgba8_   : " << br0.timeMean * 1e9 << "ns, " << br0.totalRuns << " runs" << endl;
+		br = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
+			dsry::color::lerp_rgba8_bmi);
+			//gen_simple_eeb);
+		print_br("lerp_rgba8_bmi", br);
 
-		benchresult br1 = bench<uint32_t, uint32_t, uint32_t>(
-			dsry::color::adds_rgba8_bmi,
-			gen_simple_ee);
+		br = bench(dsry::color::cvt_rgba8_rgba10_bmi);
+		print_br("cvt_rgba8_rgba10_bmi", br);
 
-		cout << "adds_rgba8_bmi: " << br1.timeMean * 1e9 << "ns, " << br1.totalRuns << " runs" << endl;
+		br = bench(dsry::color::cvt_rgba10_rgba8_bmi);
+		print_br("cvt_rgba10_rgba8_bmi", br);
 
-		benchresult br2 = bench<uint32_t, uint32_t, uint32_t>(
-			dsry::color::mid_rgba8,
-			gen_simple_ee);
-
-		cout << "mid_rgba8     : " << br2.timeMean * 1e9 << "ns, " << br2.totalRuns << " runs" << endl;
-
-		benchresult br3 = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
-			dsry::color::lerp_rgba8_,
-			gen_simple_eeb);
-
-		cout << "lerp_rgba8_   : " << br3.timeMean * 1e9 << "ns, " << br3.totalRuns << " runs" << endl;
-
-		benchresult br4 = bench<uint32_t, uint32_t, uint32_t, uint32_t>(
-			dsry::color::lerp_rgba8_bmi,
-			gen_simple_eeb);
-
-		cout << "lerp_rgba8_bmi: " << br4.timeMean * 1e9 << "ns, " << br4.totalRuns << " runs" << endl;
-
+	
 		cout << endl;
 	}
 }
 
+void print_br(const char* name, const benchresult& br)
+{
+	cout.precision(2);
+	cout << fixed;
+	cout << name << string(24 - strlen(name), ' ') <<
+		br.timeMean * 1e9 << "ns " <<
+		"iqr=" << br.timeSd * 1e9 << "ns " <<
+		"runs=" << br.totalRuns << endl;
+}
 
 void print_benchres(const char* name, const benchres& br)
 {

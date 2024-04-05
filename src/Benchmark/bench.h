@@ -4,12 +4,15 @@
 #include <algorithm>
 #include <numeric>
 
+#include <iostream>
+#include <fstream>
+
 struct benchtask
 {
 	void* fnptr;
-	uint64_t* times;
-	uint64_t repCount;
-	uint64_t setCount;
+	int64_t* times;
+	int64_t repCount;
+	int64_t setCount;
 	void* genfnptr;
 };
 
@@ -38,48 +41,31 @@ namespace dsry::bench
 		double timeMean, timeSd;
 	};
 	
-	double ticksToSecs(int64_t t)
-	{
-		if (t < 0) return 0.0;
-		// TODO
-		return t * 1.0e-9;
-	}
+	void bench_init(void);
+	double get_tsc_duration(void) noexcept;
+	uint64_t estimate_reps(void* dut, uint64_t nsTarget);
+	double ticksToSecs(int64_t t);
 
-	template<typename TRet>
-	TRet blank(uint64_t x)
+	template<typename TRet, typename... TArgs>
+	TRet blank(TArgs...)
 	{
 		return 0;
 	}
 
-	uint64_t estimate_reps(void* dut, uint64_t nsTarget)
-	{
-		constexpr uint64_t MaxCount = 1 << 27;
-		uint64_t count = 1;
-
-		while (count < MaxCount)
-		{
-			if (measure_fun_x64(dut, count) >= nsTarget)
-				return count;
-
-			count <<= 1;
-		}
-
-		return count;
-	}
 
 	template<typename TRet, typename... TArgs>
 	//benchresult bench(typename TRet(*dut)(TArgs...), typename void(*gen)(uint64_t, TArgs&...)=nullptr)
 	benchresult bench(TRet(*dut)(TArgs...), void* gen = nullptr)
 	{
-		constexpr uint64_t OptimalRuntimeNs = 100000000ull;
-		constexpr uint64_t OptimalSets = 1024;
+		constexpr int64_t OptimalRuntimeNs = 200000000ull;
+		constexpr int64_t OptimalSets = 65536;
 
-		uint64_t optimalTotalReps = estimate_reps(dut, OptimalRuntimeNs);
-		uint64_t numSets = (optimalTotalReps > OptimalSets) ? OptimalSets : optimalTotalReps;
-		uint64_t numReps = optimalTotalReps / numSets;
+		int64_t optimalTotalReps = estimate_reps(dut, OptimalRuntimeNs);
+		int64_t numSets = (optimalTotalReps > OptimalSets) ? OptimalSets : optimalTotalReps;
+		int64_t numReps = optimalTotalReps / numSets;
 
-		uint64_t* timeDut = new uint64_t[numSets];
-		uint64_t* timeCtl = new uint64_t[numSets];
+		int64_t* timeDut = new int64_t[numSets];
+		int64_t* timeCtl = new int64_t[numSets];
 
 		benchtask bt{};
 		bt.repCount = numReps;
@@ -87,7 +73,7 @@ namespace dsry::bench
 		bt.genfnptr = gen;
 
 		bt.times = timeCtl;
-		bt.fnptr = blank<uint32_t>;
+		bt.fnptr = blank<TRet, TArgs...>;
 
 		if (gen)
 			sample_fungen_x64(&bt);
@@ -104,25 +90,35 @@ namespace dsry::bench
 		std::sort(timeCtl, timeCtl + numSets);
 		std::sort(timeDut, timeDut + numSets);
 
-		uint64_t i0 = numSets / 5;
-		uint64_t i1 = numSets * 4 / 5;
-		uint64_t sumDut = 0, sumCtl = 0;
-		for (uint64_t i = i0; i < i1; i++)
+		/*std::ofstream myfile;
+		myfile.open("d:\\bench.txt");
+		for (uint64_t i = 0; i < numSets; i++)
+			myfile << timeCtl[i] << "," << timeDut[i] << std::endl;
+		myfile.close();*/
+
+
+		int64_t i0 = numSets / 4;
+		int64_t i1 = numSets * 3 / 4;
+
+		int64_t sumDiff = 0;
+		for (int64_t i = 0; i < numSets; i++)
 		{
-			sumDut += timeDut[i];
-			sumCtl += timeCtl[i];
+			//timeDut[i] = (timeDut[i] > timeCtl[i]) ? (timeDut[i] - timeCtl[i]) : 0;
 		}
+
 
 		benchresult ret{};
 		ret.totalRuns = numReps * numSets;
-		ret.timeMean = ticksToSecs(sumDut - sumCtl) / numReps / (i1 - i0);
+		ret.timeMean = ticksToSecs(timeDut[numSets/2] - timeCtl[numSets/2]) / numReps;// / (i1 - i0);
+		ret.timeSd = abs((ticksToSecs(timeDut[numSets * 3 / 4] - timeCtl[numSets * 3 / 4]) -
+			ticksToSecs(timeDut[numSets / 4] - timeCtl[numSets / 4])) / numReps);
 
 		delete[] (timeDut, timeCtl);
 
 		return ret;
 	}
 
-	benchres2 measure(void* dut, void* ctl = blank<uint32_t>)
+	/*benchres2 measure(void* dut, void* ctl = blank<uint32_t>)
 	{
 		constexpr uint64_t NumReps = 100000; // 1M
 		constexpr uint64_t NumSets = 1000;
@@ -166,5 +162,5 @@ namespace dsry::bench
 		delete[](tDut, tCtl);
 
 		return ret;
-	}
+	}*/
 };
