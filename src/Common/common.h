@@ -6,3 +6,4 @@
 #include "color.h"
 #include "cpuinfo.h"
 #include "text.h"
+#include "fastmath.h"
