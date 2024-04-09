@@ -97,31 +97,21 @@ namespace dsry::encoding
 
     uint32_t encode_zigzag_bmi(int32_t x)
     {
-        int32_t mask = x >> 31; // we need arithmetic shift here (MSVC is OK)
-        return _rorx_u32(x, 31) ^ (mask << 1);
-        //return (x >= 0) ? (x << 1) : ((-x) << 1) | 0x1;
+        return (x << 1) ^ (x >> 31);
     }
 
     int32_t decode_zigzag_bmi(uint32_t x)
     {
-        if (x & 0x1) return -1 - (x >> 1);
-        return x >> 1;
-        //int32_t ret = _rorx_u32(x, 1);
-        //return ret ^ ((x << 31) - 1);
+        return (x >> 1) ^ (-(int32_t)(x & 1));
     }
 
     uint64_t encode_zigzag_bmi(int64_t x)
     {
-        int64_t mask = x >> 63; // we need arithmetic shift here (MSVC is OK)
-        return _rorx_u64(x, 63) ^ (mask << 1);
+        return (x << 1) ^ (x >> 63);
     }
 
     int64_t decode_zigzag_bmi(uint64_t x)
     {
-        // pending MSVC bug resolution
-        if (x & 0x1) return -1LL - (x >> 1);
-        return x >> 1;
-        //int64_t ret = _rorx_u64(x, 1);
-        //return ret ^ ((x << 63) - 1);
+        return (x >> 1) ^ (-(int64_t)(x & 1));
     }
 };
