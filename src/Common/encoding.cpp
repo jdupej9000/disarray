@@ -97,8 +97,9 @@ namespace dsry::encoding
 
     uint32_t encode_zigzag_bmi(int32_t x)
     {
-        int32_t mask = x >> 31; // we need arithmetic shift here (MSVC is OK)
-        return _rorx_u32(x, 31) ^ (mask << 1);
+        //int32_t mask = x >> 31; // we need arithmetic shift here (MSVC is OK)
+       // return _rorx_u32(x, 31) ^ (mask << 1);
+        return (x << 1) ^ (x >> 31);
         //return (x >= 0) ? (x << 1) : ((-x) << 1) | 0x1;
     }
 
