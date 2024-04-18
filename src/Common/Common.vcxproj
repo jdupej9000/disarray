@@ -24,6 +24,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="cpuinfo.h" />
     <ClInclude Include="encoding.h" />
+    <ClInclude Include="fastmath.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="text.h" />
@@ -32,6 +33,7 @@
     <ClCompile Include="color.cpp" />
     <ClCompile Include="cpuinfo.cpp" />
     <ClCompile Include="encoding.cpp" />
+    <ClCompile Include="fastmath.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="text.cpp" />
     <ClCompile Include="system.cpp" />
