@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Benchmark", "Benchmark\Benc
 		{D184D307-70E6-447A-B311-B2B7F5619402} = {D184D307-70E6-447A-B311-B2B7F5619402}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SystemFirmwareTables", "SystemFirmwareTables\SystemFirmwareTables.vcxproj", "{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -69,6 +71,14 @@ Global
 		{E600315E-1131-407F-A8BF-9CD5716BCE84}.Release|x64.Build.0 = Release|x64
 		{E600315E-1131-407F-A8BF-9CD5716BCE84}.Release|x86.ActiveCfg = Release|Win32
 		{E600315E-1131-407F-A8BF-9CD5716BCE84}.Release|x86.Build.0 = Release|Win32
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Debug|x64.ActiveCfg = Debug|x64
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Debug|x64.Build.0 = Debug|x64
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Debug|x86.ActiveCfg = Debug|Win32
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Debug|x86.Build.0 = Debug|Win32
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Release|x64.ActiveCfg = Release|x64
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Release|x64.Build.0 = Release|x64
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Release|x86.ActiveCfg = Release|Win32
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +86,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E0ABA16B-44A7-4210-AA78-A077746C3C1E} = {F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}
 		{FC07D3A3-1EB3-4F09-9FC7-FDD0952C5CD9} = {F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}
+		{43FC94A9-2DB3-451B-813A-AAB77A0B5B62} = {F8A712B2-9D6E-4495-9A72-1D3ACF1D6ECB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8FD979F4-A379-4CA2-AB7C-5160D462D4A6}
