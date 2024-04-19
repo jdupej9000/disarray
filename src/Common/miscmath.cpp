@@ -32,4 +32,9 @@ namespace dsry::math
 
 		return u << shift;
 	}
+
+	uint64_t lcm(uint64_t u, uint64_t v)
+	{
+		return (u / gcd(u, v)) * v;
+	}
 };
