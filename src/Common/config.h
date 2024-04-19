@@ -15,3 +15,11 @@
 
 #define dsry_assert(x) assert(x)
 #define dsry_assert_notreached assert(false)
+
+#if defined(DSRY_CPP20)
+#define dsry_likely(x) (x) [[likely]]
+#define dsry_unlikely(x) (x) [[unlikely]]
+#else
+#define dsry_likely(x) (x)
+#define dsry_unlikely(x) (x)
+#endif
