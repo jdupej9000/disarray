@@ -22,18 +22,24 @@
     <ClInclude Include="color.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="conversion.h" />
     <ClInclude Include="cpuinfo.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="fastmath.h" />
+    <ClInclude Include="miscmath.h" />
+    <ClInclude Include="packing.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="system.h" />
     <ClInclude Include="text.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="conversion.cpp" />
     <ClCompile Include="cpuinfo.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="fastmath.cpp" />
+    <ClCompile Include="miscmath.cpp" />
+    <ClCompile Include="packing.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="text.cpp" />
     <ClCompile Include="system.cpp" />

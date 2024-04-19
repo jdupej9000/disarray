@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #if (__cplusplus >= 201703L || (defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L)))
 #define DSRY_CPP17
 #endif
@@ -10,3 +12,6 @@
 
 // If defined, the use of x86 BMI and BMI2 instructions is allowed.
 #define DSRY_BMI
+
+#define dsry_assert(x) assert(x)
+#define dsry_assert_notreached assert(false)
