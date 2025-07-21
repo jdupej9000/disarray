@@ -26,7 +26,7 @@ int main()
     wr.set_data_matrix(lat, num_cpus, 3, 0);
     wr.set_colormap(lat, num_cpus, &colormap, 0, 200);
 
-   cout << "Latency in nanoseconds:" << endl;
+    cout << "Latency in nanoseconds:" << endl;
     wr.write(cout);
 
     delete[] lat;

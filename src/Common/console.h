@@ -123,6 +123,6 @@ namespace dsry::console
         void set_colormap(const float* data, int row_stride, const dsry::color::lut* lut, float v0, float v1);
         void set_column_width(int w);
         void set_padding(int before, int after);
-
+        void set_column_names(const std::string* names);
     };
 };

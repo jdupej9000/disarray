@@ -23,7 +23,7 @@ namespace dsry::console
 	void table_writer::write(std::ostream& os)
 	{
 		os << reset();
-		write_padding(os, m_padding0 + m_padding1 + m_rowNameWidth);
+		write_padding(os, m_rowNameWidth);
 		for (int i = 0; i < m_cols; i++) {
 			write_padding(os, m_padding0);
 			write_fixed(os, m_colname(i), get_width(i));
@@ -74,6 +74,11 @@ namespace dsry::console
 	{
 		m_padding0 = before;
 		m_padding1 = after;
+	}
+
+	void table_writer::set_column_names(const std::string* names)
+	{
+		m_colname = [names](int x) { return names[x]; };
 	}
 
 	int table_writer::get_width(int idx)
