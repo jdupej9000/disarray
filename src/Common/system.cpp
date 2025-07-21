@@ -32,4 +32,23 @@ namespace dsry::system
         _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
         _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
     }
+
+    size_t get_num_cpus(void)
+    {
+        SYSTEM_INFO sysinfo;
+        memset(&sysinfo, 0, sizeof(sysinfo));
+        GetSystemInfo(&sysinfo);
+
+        return sysinfo.dwNumberOfProcessors;
+    }
+
+    void pin_thread_to_cpu(size_t index)
+    {
+        SetThreadAffinityMask(GetCurrentThread(), 1ULL << index);
+    }
+
+    void set_thread_highest_priority(void)
+    {
+        SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+    }
 };

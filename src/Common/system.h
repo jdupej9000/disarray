@@ -15,4 +15,13 @@ namespace dsry::system
 	// Sets the flush-to-zero (FTZ) and denormals-are-zero (DAZ) flags
 	// in the x64's mxcsr register.
 	void set_mxcsr_ftz_daz(void);
+
+	// Returns the number of CPUs.
+	size_t get_num_cpus(void);
+
+	// Sets the thread affinity mask to pin the thread to the specified CPU.
+	void pin_thread_to_cpu(size_t index);
+
+	// Sets the current thread's priority to maximum.
+	void set_thread_highest_priority(void);
 };

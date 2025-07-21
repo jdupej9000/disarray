@@ -9,3 +9,6 @@
 #include "fastmath.h"
 #include "packing.h"
 #include "miscmath.h"
+#include "system.h"
+#include "console.h"
+#include "lut.h"
