@@ -63,6 +63,11 @@ namespace dsry::system
 		uint32_t m_cmov : 1;
 		uint32_t m_cmpccxadd : 1;
 		uint32_t m_movbe : 1;
+		uint32_t m_movdiri : 1;
+		uint32_t m_movdiri64b : 1;
+		uint32_t m_serialize : 1;
+		uint32_t m_rao_int : 1;
+		uint32_t m_user_msr : 1;
 		uint32_t : 0;
 
 		uint32_t m_64 : 1;
@@ -119,6 +124,10 @@ namespace dsry::system
 		uint32_t m_amx_bf16 : 1;
 		uint32_t m_amx_cplx : 1;
 		uint32_t m_amx_fp16 : 1;
+		uint32_t : 0;
+
+		uint32_t m_bmi_slow : 1;
+		uint32_t m_rep_movsb_fast : 1;
 		uint32_t : 0;
 
 		unsigned short m_avx10_version, m_avx10_max_width;

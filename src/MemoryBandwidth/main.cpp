@@ -30,6 +30,7 @@ int main()
     cout << "CPU        : " << dsry::system::get_cpu_info().m_brandString << endl;
     cout << "Codename   : " << dsry::system::get_cpu_info().m_codeName << endl;
     cout << "Extensions : " << dsry::system::get_cpu_instruction_list() << endl;
+    cout << "Hybrid     : " << (dsry::system::get_cpu_info().m_hybrid ? "yes" : "no") << endl;
     size_t num_cpus = dsry::system::get_num_cpus();
     cout << "Cores      : " << num_cpus << endl;
 

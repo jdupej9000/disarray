@@ -68,6 +68,11 @@ namespace dsry::system
 		if (i.m_sm4) ss << "sm4 ";
 		if (i.m_cmpccxadd) ss << "cmpccxadd ";
 		if (i.m_movbe) ss << "movbe ";
+		if (i.m_movdiri) ss << "movdiri ";
+		if (i.m_movdiri64b) ss << "movdiri64b ";
+		if (i.m_serialize) ss << "serialize ";
+		if (i.m_rao_int) ss << "rao-int ";
+		if (i.m_user_msr) ss << "user-msr ";
 
 		if (i.m_avx512_f) ss << "avx512.f ";
 		if (i.m_avx512_dq) ss << "avx512.dq ";
@@ -207,6 +212,10 @@ namespace dsry::system
 		info.m_vaes = is_bit(regs[2], 9);
 		info.m_hybrid = is_bit(regs[3], 15);
 		info.m_gfni = is_bit(regs[2], 8);
+		info.m_rep_movsb_fast = is_bit(regs[3], 4);
+		info.m_movdiri = is_bit(regs[2], 27);
+		info.m_movdiri64b = is_bit(regs[2], 28);
+		info.m_serialize = is_bit(regs[3], 14);
 
 		__cpuidex(regs, 7, 1);
 		info.m_sha512 = is_bit(regs[0], 0);
@@ -222,6 +231,8 @@ namespace dsry::system
 		info.m_amx_cplx = is_bit(regs[3], 8);
 		info.m_avx_vnni_int16 = is_bit(regs[3], 16);
 		info.m_apx = is_bit(regs[3], 21);
+		info.m_rao_int = is_bit(regs[0], 3);
+		info.m_user_msr = is_bit(regs[3], 15);
 
 		if (maxF >= 0x24)
 		{
@@ -248,6 +259,9 @@ namespace dsry::system
 			info.m_level = 1;
 		else
 			info.m_level = 0; // should not happen
+
+		info.m_bmi_slow = info.m_bmi1 && info.m_bmi2 &&
+			(info.m_class == CPU_CLASS::amd_zen || info.m_class == CPU_CLASS::amd_zen2);
 	}
 
 	void make_x86_cpu_class(cpuinfo_t& inf)
