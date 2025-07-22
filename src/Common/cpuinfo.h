@@ -32,7 +32,8 @@ namespace dsry::system
 		amd_zen = amd | 0x1,
 		amd_zen2 = amd | 0x2,
 		amd_zen3 = amd | 0x3,
-		amd_zen4 = amd | 0x4
+		amd_zen4 = amd | 0x4,
+		amd_zen5 = amd | 0x5
 	};
 
 	constexpr size_t MAX_BRANDSTRING_LEN = 48;

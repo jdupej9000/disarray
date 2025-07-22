@@ -317,6 +317,7 @@ namespace dsry::system
 		case CPU_CLASS::amd_zen2: return "zen2";
 		case CPU_CLASS::amd_zen3: return "zen3";
 		case CPU_CLASS::amd_zen4: return "zen4";
+		case CPU_CLASS::amd_zen5: return "zen5";
 		}
 
 		return "unknown";

@@ -30,7 +30,6 @@ int main()
     cout << "CPU        : " << dsry::system::get_cpu_info().m_brandString << endl;
     cout << "Codename   : " << dsry::system::get_cpu_info().m_codeName << endl;
     cout << "Extensions : " << dsry::system::get_cpu_instruction_list() << endl;
-
     size_t num_cpus = dsry::system::get_num_cpus();
     cout << "Cores      : " << num_cpus << endl;
 
@@ -69,9 +68,9 @@ void measure(size_t n)
     string col_names[2] = { "Write", "Read" };
 
     dsry::console::table_writer wr{ (int)2, (int)n };
-    wr.set_column_width(4);
+    wr.set_column_width(5);
     wr.set_padding(1, 0);
-    wr.set_data_matrix(bw, 2, 4, 1);
+    wr.set_data_matrix(bw, 2, 5, 1);
     wr.set_column_names(col_names);
 
     cout << "Single core bandwidth in GB/s:" << endl;
