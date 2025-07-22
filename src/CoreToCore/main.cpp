@@ -7,11 +7,17 @@ using namespace dsry;
 
 int main()
 {
+    dsry::system::init_cpu_info();
+
     cout << "Setting hybrid scheduling policy." << endl;
     dsry::system::set_process_hybrid_policy(dsry::system::HYBRID_POLICY::high_performance);
 
+    cout << "CPU        : " << dsry::system::get_cpu_info().m_brandString << endl;
+    cout << "Codename   : " << dsry::system::get_cpu_info().m_codeName << endl;
+    cout << "Extensions : " << dsry::system::get_cpu_instruction_list() << endl;
+
     size_t num_cpus = dsry::system::get_num_cpus();
-    cout << "Detected " << num_cpus << " CPUs." << endl;
+    cout << "Cores      : " << num_cpus << endl;
 
     float* lat = new float[num_cpus * num_cpus];
 

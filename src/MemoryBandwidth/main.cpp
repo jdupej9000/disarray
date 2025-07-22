@@ -17,13 +17,22 @@ void measure(size_t n);
 float measure_write(uint8_t* p, size_t bytes, size_t passes);
 float measure_read(uint8_t* p, size_t bytes, size_t passes);
 
+extern "C" void measure_write_inner_x64(uint8_t* p, size_t bytes);
+extern "C" void measure_read_inner_x64(uint8_t* p, size_t bytes);
+
 int main()
 {
+    dsry::system::init_cpu_info();
+
     cout << "Setting hybrid scheduling policy." << endl;
     dsry::system::set_process_hybrid_policy(dsry::system::HYBRID_POLICY::high_performance);
     
+    cout << "CPU        : " << dsry::system::get_cpu_info().m_brandString << endl;
+    cout << "Codename   : " << dsry::system::get_cpu_info().m_codeName << endl;
+    cout << "Extensions : " << dsry::system::get_cpu_instruction_list() << endl;
+
     size_t num_cpus = dsry::system::get_num_cpus();
-    cout << "Detected " << num_cpus << " CPUs." << endl;
+    cout << "Cores      : " << num_cpus << endl;
 
     cout << "Testing single core bandwidth." << endl;
     measure(num_cpus);
@@ -33,7 +42,7 @@ int main()
 void measure(size_t n)
 {
     constexpr size_t BlockSize = 20 * 1048576ull;
-    constexpr size_t Passes = 100;
+    constexpr size_t Passes = 500;
 
     cout << "Writing " << Passes << "x " << BlockSize / 1048576.0f << " MB." << endl;   
 
@@ -80,14 +89,7 @@ float measure_write(uint8_t* p, size_t bytes, size_t passes)
 
     for (size_t j = 0; j < passes; j++) {
         steady_clock::time_point ts1 = steady_clock::now();
-
-        for (size_t i = 0; i < bytes; i += 128) {
-            _mm256_stream_ps((float*)(p + i), ones);
-            _mm256_stream_ps((float*)(p + i + 32), ones);
-            _mm256_stream_ps((float*)(p + i + 64), ones);
-            _mm256_stream_ps((float*)(p + i + 96), ones);
-        }
-
+        measure_write_inner_x64(p, bytes);
         rtt = std::min(rtt, steady_clock::now() - ts1);
     }
 
@@ -97,27 +99,14 @@ float measure_write(uint8_t* p, size_t bytes, size_t passes)
     return gb / seconds;
 }
 
-#pragma optimize("", off)
+
 float measure_read(uint8_t* p, size_t bytes, size_t passes)
 {
     nanoseconds rtt = nanoseconds::max();
 
     for (size_t j = 0; j < passes; j++) {
-
-        __m256i a0 = _mm256_setzero_si256(),
-            a1 = _mm256_setzero_si256(),
-            a2 = _mm256_setzero_si256(),
-            a3 = _mm256_setzero_si256();
-
         steady_clock::time_point ts1 = steady_clock::now();
-
-        for (size_t i = 0; i < bytes; i += 128) {
-            _mm256_stream_load_si256((const __m256i*)(p + i));
-            _mm256_stream_load_si256((const __m256i*)(p + i + 32));
-            _mm256_stream_load_si256((const __m256i*)(p + i + 64));
-            _mm256_stream_load_si256((const __m256i*)(p + i + 96));
-        }
-
+        measure_read_inner_x64(p, bytes);
         rtt = std::min(rtt, steady_clock::now() - ts1);
     }
 
