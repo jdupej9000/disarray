@@ -22,6 +22,7 @@ namespace dsry::system
 		intel_skl = intel | 0x1,
 		intel_icl = intel | 0x2,
 		intel_adl = intel | 0x3,
+		intel_arl = intel | 0x4,
 
 		intel_x = 0x2000,
 		intel_skl_x = intel_x | 0x1,
@@ -32,7 +33,9 @@ namespace dsry::system
 		amd_zen = amd | 0x1,
 		amd_zen2 = amd | 0x2,
 		amd_zen3 = amd | 0x3,
-		amd_zen4 = amd | 0x4
+		amd_zen4 = amd | 0x4,
+		amd_zen5 = amd | 0x5,
+		amd_zen6 = amd | 0x6
 	};
 
 	constexpr size_t MAX_BRANDSTRING_LEN = 48;
