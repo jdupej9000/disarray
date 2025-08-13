@@ -5,6 +5,7 @@ namespace dsry::conversion
 {
 	void f64_to_f32(float* dest, const double* src, size_t length)
 	{
+#if defined(DSRY_X64)
 		size_t numBlocks = length >> 4;
 
 		for (size_t i = 0; i < numBlocks; i++)
@@ -23,13 +24,16 @@ namespace dsry::conversion
 			_mm256_store_ps(desti, f01);
 			_mm256_store_ps(desti + 8, f23);
 		}
-
+#else
+		constexpr size_t numBlocks = 0;
+#endif
 		for (size_t i = numBlocks << 4; i < length; i++)
 			dest[i] = (float)src[i];
 	}
 
 	void f32_to_f64(double* dest, const float* src, size_t length)
 	{
+#if defined(DSRY_X64)
 		size_t numBlocks = length >> 4;
 
 		for (size_t i = 0; i < numBlocks; i++)
@@ -50,7 +54,9 @@ namespace dsry::conversion
 			_mm256_store_pd(desti + 8, d2);
 			_mm256_store_pd(desti + 12, d3);
 		}
-
+#else
+		constexpr size_t numBlocks = 0;
+#endif
 		for (size_t i = numBlocks << 4; i < length; i++)
 			dest[i] = (double)src[i];
 	}

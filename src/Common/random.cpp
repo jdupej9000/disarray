@@ -31,6 +31,7 @@ namespace dsry::math
 
     uint64_t rand_wyhash(uint64_t& state)
     {
+#if defined(DSRY_X64)
         //https://lemire.me/blog/2021/03/17/apples-m1-processor-and-the-full-128-bit-integer-product/
         state += 0x60bee2bee120fc15ull;
         uint64_t hi, lo;
@@ -38,14 +39,21 @@ namespace dsry::math
         uint64_t m1 = hi ^ lo;
         lo = _mul128(m1, 0x1b03738712fad5c9ull, (long long*)&hi);
         return hi ^ lo;
+#else
+        return state;
+#endif
     }
 
     uint64_t rand_lehmer64(uint64_t& state)
     {
+#if defined(DSRY_X64)
         // https://lemire.me/blog/2019/03/19/the-fastest-conventional-random-number-generator-that-can-pass-big-crush/
         uint64_t hi;
         state = _mul128(state, 0xda942042e4dd58b5ull, (long long*)&hi);
         return hi;
+#else
+        return state;
+#endif
     }
 
     uint32_t rand_xorshift32(uint64_t& state)

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <intrin.h>
+#include "config.h"
 
 namespace dsry::text
 {
@@ -29,7 +30,13 @@ namespace dsry::text
 			if (hasz | hasn)
 			{
 				if (hasz < hasn) return nullptr; // found zero before needle
+#if defined(DSRY_X64)
 				else return (const char*)p8 + ((_tzcnt_u64(hasz | hasn) + 1) >> 3) - 1;
+#elif defined(DSRY_ARM64)
+				else return (const char*)p8 + ((_CountTrailingZeros64(hasz | hasn) + 1) >> 3) - 1;
+#else
+				#error "Unsupported architecture."
+#endif
 			}
 
 			p8++;

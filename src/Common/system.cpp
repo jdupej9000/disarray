@@ -29,8 +29,10 @@ namespace dsry::system
 
     void set_mxcsr_ftz_daz(void)
     {
+#if defined(DSRY_X64)
         _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
         _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+#endif
     }
 
     size_t get_num_cpus(void)

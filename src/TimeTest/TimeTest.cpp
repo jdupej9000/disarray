@@ -21,9 +21,11 @@ int main()
     print_clock<chrono::steady_clock>();
     print_clock<chrono::system_clock>();
 
+#if defined(DSRY_X64)
     print_clock_info("CPU Time Stamp Counter", measure_rdtsc(), measure_query_time<uint64_t>(
         [](uint64_t& li) { li = 0;  },
         [](uint64_t& li) { li = __rdtsc();  }));
+#endif
 
     print_clock_info("clock", 1.0 / CLOCKS_PER_SEC, measure_query_time<clock_t>(
         [](clock_t& li) { li = 0;  },
@@ -56,6 +58,7 @@ void print_clock_info(const char* name, double period, double query)
 
 double measure_rdtsc(void)
 {
+#if defined(DSRY_X64)
     auto t0 = std::chrono::high_resolution_clock::now();
     uint64_t r0 = __rdtsc();
 
@@ -65,6 +68,9 @@ double measure_rdtsc(void)
     uint64_t r1 = __rdtsc();
     
     return 1e-9 * (double)std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count() / (double)(r1 - r0);
+#else
+    return 0;
+#endif
 }
 
 double measure_GetTickCount(void)

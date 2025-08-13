@@ -34,12 +34,14 @@ namespace dsry::color
 		return (ga & ~Mask_OddBytes_32) | ((rb >> 8) & Mask_OddBytes_32);
 	}
 
+#if defined(DSRI_BMI)
 	uint32_t lerp_rgba8_bmi(uint32_t a, uint32_t b, uint32_t t)
 	{
 		uint64_t x = _pdep_u64(a, Mask_OddBytes_64) * (256 - t);
 		x += _pdep_u64(b, Mask_OddBytes_64) * t;
 		return (uint32_t)_pext_u64(x, ~Mask_OddBytes_64);
 	}
+#endif
 
 	uint32_t adds_rgba8_(uint32_t a, uint32_t b)
 	{
@@ -49,6 +51,7 @@ namespace dsry::color
 		return ovf | nomsb | ((a | b) & Mask_ByteSwarMsb_32);
 	}
 
+#if defined(DSRI_BMI)
 	uint32_t adds_rgba8_bmi(uint32_t a, uint32_t b)
 	{
 		uint64_t x = _pdep_u64(a, Mask_OddBytes_64) + _pdep_u64(b, Mask_OddBytes_64);
@@ -68,5 +71,5 @@ namespace dsry::color
 		uint32_t alpha = (x >> 30) * 0x55u; // replicate 2bit alpha into 8bit (ab) -> (abababab)
 		return _pext_u32(x, Mask_8b10b_32) | (alpha << 24);
 	}
-
+#endif
 };

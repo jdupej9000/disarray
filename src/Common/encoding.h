@@ -6,7 +6,7 @@
 
 namespace dsry::encoding
 {
-
+#if defined(DSRY_BMI)
 	// Encode u64 or u32 using LEB128 into pDest and return the number of Bytes added.
 	int encode_leb128_bmi(uint8_t* pDest, uint64_t x);
 	int encode_leb128_bmi(uint8_t* pDest, uint32_t x);
@@ -24,7 +24,7 @@ namespace dsry::encoding
 	uint64_t encode_zigzag_bmi(int64_t x);
 	int32_t decode_zigzag_bmi(uint32_t x);
 	int64_t decode_zigzag_bmi(uint64_t x);
-
+#endif
 	// Perform exp-Golomb encoding of x with M=2^N. The encoded value is returned
 	// and number of bits used stored in bits. If bits>64 the function has failed
 	// and the result is undefined. UNTESTED
@@ -40,7 +40,11 @@ namespace dsry::encoding
 	template<uint32_t N>
 	uint32_t decode_expgolomb_bmi(uint64_t x, int& bits)
 	{
+#if defined(DSRY_X64)
 		uint32_t q = _tzcnt_u64(~x);
+#elif defined(DSRY_ARM64)
+		uint32_t q = _CountTrailingZeros64(~x);
+#endif
 		uint32_t r = (x >> (q + 1)) & ((1 << N) - 1);
 		bits = q + 1 + N;
 		return (((uint64_t)q) << N) | r;
@@ -63,12 +67,12 @@ namespace dsry::encoding
 #else
 
 #pragma message ("encoding.h uses BMI despite DSRY_BMI being not defined.")
-#define encode_leb128 encode_leb128_bmi
-#define decode_leb128 decode_leb128_bmi
-#define encode_morton encode_morton_bmi
-#define decode_morton decode_morton_bmi
-#define encode_zigzag encode_zigzag_bmi
-#define decode_zigzag decode_zigzag_bmi
-#define decode_expgolomb decode_expgolomb_bmi
+#define encode_leb128 (void)
+#define decode_leb128 (void)
+#define encode_morton (void)
+#define decode_morton (void)
+#define encode_zigzag (void)
+#define decode_zigzag (void)
+#define decode_expgolomb (void)
 
 #endif

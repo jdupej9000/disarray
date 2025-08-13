@@ -10,8 +10,15 @@
 #define DSRY_CPP20
 #endif
 
+#if defined(_M_X64)
 // If defined, the use of x86 BMI and BMI2 instructions is allowed.
 #define DSRY_BMI
+#define DSRY_X64
+
+#else defined(_M_ARM64)
+#define DSRY_ARM64
+
+#endif
 
 #define dsry_assert(x) assert(x)
 #define dsry_assert_notreached assert(false)

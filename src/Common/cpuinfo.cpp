@@ -131,6 +131,7 @@ namespace dsry::system
 
 	void make_x86_base_info(cpuinfo_t& info)
 	{
+#if defined(DSRY_X64)
 		int regs[4];
 		__cpuid(regs, 0x0);
 		int maxF = regs[0];
@@ -156,10 +157,12 @@ namespace dsry::system
 			__cpuid(regs, 0x80000004);
 			memcpy(info.m_brandString + 32, regs, sizeof(regs));
 		}
+#endif
 	}
 
 	void make_x86_cpu_caps(cpuinfo_t& info)
 	{
+#if defined(DSRY_X64)
 		int regs[4];
 		__cpuid(regs, 0x0);
 		int maxF = regs[0];
@@ -262,12 +265,13 @@ namespace dsry::system
 
 		info.m_bmi_slow = info.m_bmi1 && info.m_bmi2 &&
 			(info.m_class == CPU_CLASS::amd_zen || info.m_class == CPU_CLASS::amd_zen2);
+#endif
 	}
 
 	void make_x86_cpu_class(cpuinfo_t& inf)
 	{
 		CPU_CLASS ret = CPU_CLASS::unknown;
-
+#if defined(DSRY_X64)
 		int regs[4];
 		__cpuid(regs, 0x0);
 		if (regs[1] == 0x756e6547 && regs[2] == 0x6c65746e && regs[3] == 0x49656e69) // "GenuineIntel"
@@ -296,7 +300,7 @@ namespace dsry::system
 		}
 
 		strcpy_s(inf.m_codeName, MAX_CODENAME_LEN, pszCodeName);
-
+#endif
 		inf.m_class = ret;
 	}
 

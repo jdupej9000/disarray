@@ -17,6 +17,7 @@ namespace dsry::math
 
 	uint64_t gcd(uint64_t u, uint64_t v)
 	{
+#if defined(DSRY_X64)
 		// This is the noswap algorithm from https://lemire.me/blog/2024/04/13/greatest-common-divisor-the-extended-euclidean-algorithm-and-speed/
 		if dsry_unlikely(u == 0 || v == 0) 
 			return u + v;
@@ -31,6 +32,25 @@ namespace dsry::math
 		} while (v != 0);
 
 		return u << shift;
+#elif defined(DSRY_ARM64)
+		// This is the noswap algorithm from https://lemire.me/blog/2024/04/13/greatest-common-divisor-the-extended-euclidean-algorithm-and-speed/
+		if dsry_unlikely(u == 0 || v == 0)
+			return u + v;
+
+		auto shift = _CountTrailingZeros64(u | v);
+		u >>= _CountTrailingZeros64(u);
+		do
+		{
+			uint64_t t = v >> _CountTrailingZeros64(v);
+			if (u > t) v = u - t, u = t;
+			else v = t - u;
+		} while (v != 0);
+
+		return u << shift;
+#else
+		return 0;
+#endif
+
 	}
 
 	uint64_t lcm(uint64_t u, uint64_t v)

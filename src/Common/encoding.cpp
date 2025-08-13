@@ -13,7 +13,7 @@ namespace dsry::encoding
     constexpr uint32_t Mask_InterleaveOdd_32 = 0b01010101010101010101010101010101;
     constexpr uint64_t Mask_InterleaveOdd_64 = 0b0101010101010101010101010101010101010101010101010101010101010101;
 
-
+#if defined(DSRY_BMI)
     int encode_leb128_bmi(uint8_t* pDest, uint32_t x)
     {
         int length = DivideBy7Rev_32[_lzcnt_u32(x)];
@@ -114,4 +114,5 @@ namespace dsry::encoding
     {
         return (x >> 1) ^ (-(int64_t)(x & 1));
     }
+#endif
 };
